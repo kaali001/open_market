@@ -21,6 +21,7 @@ const Login = () => {
 			const { data: res } = await axios.post(url, data);
 
 			localStorage.setItem("token", res.user); // user comes from backend after successful login
+			localStorage.setItem("user_id", res.user_id); 
 			window.localStorage.setItem("isLoggedIn",true);
 			window.location = "/product-form";
 		} catch (error) {

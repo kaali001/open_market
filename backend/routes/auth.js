@@ -38,7 +38,7 @@ router.post('/', async (req, res) => {
          
 		console.log("After JWT sign:",token);
 
-		res.status(200).send({ user:token , message: "logged in successfully" });
+		res.status(200).send({ user:token ,user_id:user._id, message: "logged in successfully" });
 	} catch (error) {
 		res.status(500).send({ message: "Internal Server Error" });
 	}

@@ -1,80 +1,119 @@
-
 const mongoose = require('mongoose');
 const express = require("express");
-const path = require('path');
-const app = express();
+const http = require("http");
+const socketIo = require("socket.io");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const router = require("express").Router();
 
-
 const userRoutes = require("./routes/users");
 const authRoutes = require("./routes/auth");
 const productsRoutes = require("./routes/products");
-
-
-dotenv.config({path:'./config.env'});
-
-require('./Db/conn');
-
-
-
-
-const User = require("./models/user");
 const Product = require("./models/product");
 const Transaction = require("./models/transaction");
 
+dotenv.config({ path: './config.env' });
+require('./Db/conn');
+
+const app = express();
+const server = http.createServer(app);
+const io = socketIo(server, {
+  cors: {
+    origin: "http://localhost:3000", // Adjust this to match your frontend's URL
+    methods: ["GET", "POST"]
+  }
+});
 
 const port = process.env.PORT || 5000;
 
-app.get(
-    "/",
-    (req,res) =>{
-        res.send("Hello world.")
-    }
-)
-
-//used to get no error on getting the json data
 app.use(express.json());
 app.use(cors());
 
+// Use routes
+app.use("/api/users", userRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/products", productsRoutes);
 
-// POST endpoint to add product details
-router.post('/', async (req, res) => {
+// Bidding Logic
+const activeBids = {};
+
+io.on("connection", (socket) => {
+  console.log("New client connected");
+
+  socket.on("joinProductRoom", (productId) => {
+    socket.join(productId);
+  });
+
+  socket.on("placeBid", async ({ productId, userId, bidAmount }) => {
+    console.log("Bid received:", { productId, userId, bidAmount });
+
     try {
-      const {product_name,product_image,price, description,origin} = req.body;
-      const userID = req.user.id; // Assuming you have user information stored in req.user after authentication
-  
-      // Create a new product instance
-      const product = new Product({
-        userID,
-        product_name,
-        product_image,
-        description,
-        price,
-        origin
+      // Convert productId to ObjectId if it's not already
+      const objectId = new mongoose.Types.ObjectId(productId);
+
+      // Initialize bid if it doesn't exist
+      if (!activeBids[objectId]) {
+        activeBids[objectId] = {
+          highestBid: bidAmount,
+          highestBidder: userId,
+          timeout: setTimeout(async () => {
+            // Handle transaction on timeout
+            const product = await Product.findById(objectId);
+            console.log("product detail",product);
+            const transaction = new Transaction({
+              buyerID: activeBids[objectId].highestBidder,
+              sellerID: product.userID,
+              productID: objectId,
+              amount: activeBids[objectId].highestBid
+            });
+
+            await transaction.save();
+            io.to(objectId).emit("biddingEnded", transaction);
+
+            delete activeBids[objectId]; // Clean up the bid
+          }, 10000)
+        };
+      } else {
+        // Update bid if already exists
+        clearTimeout(activeBids[objectId].timeout);
+        activeBids[objectId].highestBid = bidAmount;
+        activeBids[objectId].highestBidder = userId;
+        activeBids[objectId].timeout = setTimeout(async () => {
+          // Handle transaction on timeout
+          const product = await Product.findById(objectId);
+          const transaction = new Transaction({
+            buyerID: activeBids[objectId].highestBidder,
+            sellerID: product.userID,
+            productID: objectId,
+            amount: activeBids[objectId].highestBid
+          });
+
+          await transaction.save();
+          io.to(objectId).emit("biddingEnded", transaction);
+
+          delete activeBids[objectId]; // Clean up the bid
+        }, 10000);
+      }
+
+      io.to(objectId).emit("newBid", {
+        highestBid: activeBids[objectId].highestBid,
+        highestBidder: activeBids[objectId].highestBidder
       });
-  
-      // Save the product to the database
-      await product.save();
-  
-      res.status(201).json(product); // Send the newly created product as response
     } catch (error) {
-      console.error('Error adding product:', error);
-      res.status(500).json({ error: 'Internal Server Error' }); // Handle server error
+      console.error("Error handling bid:", error);
+      io.to(socket.id).emit("bidError", "Failed to process the bid. Please try again.");
     }
   });
 
+  socket.on("disconnect", () => {
+    console.log("Client disconnected");
+    // Ensure socket leaves any joined rooms
+    socket.rooms.forEach(room => {
+      socket.leave(room);
+    });
+  });
+});
 
-
-  
-
-// routing
-
-app.use("/api/users",userRoutes);
-app.use("/api/auth",authRoutes);
-app.use("/api/products",productsRoutes);
-
-app.listen(port,function(){
-    console.log(`Listening to port at ${port}`)
+server.listen(port, function () {
+  console.log(`Listening to port at ${port}`);
 });

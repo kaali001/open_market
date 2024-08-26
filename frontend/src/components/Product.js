@@ -1,15 +1,15 @@
-import React from "react";
-import { NavLink } from "react-router-dom";
-import styled from "styled-components";
+import React from 'react';
+import { NavLink } from 'react-router-dom';
+import styled from 'styled-components';
 
 const Product = ({ product }) => {
-  const { id, name, image, description, price } = product;
+  const { _id, product_name, product_image, description, price } = product;
 
   return (
-    <ProductCard to={`/aboutproduct/${id}`}>
-      <CardImage src={image} alt={name} />
+    <ProductCard to={`/aboutproduct/${_id}`}>
+      <CardImage src={product_image} alt={product_name} />
       <CardBody>
-        <ProductName>{name}</ProductName>
+        <ProductName>{product_name}</ProductName>
         <ProductDescription>{description}</ProductDescription>
         <Price>${price}</Price>
       </CardBody>
@@ -18,8 +18,6 @@ const Product = ({ product }) => {
 };
 
 const ProductCard = styled(NavLink)`
-  
-  
   text-decoration: none;
   color: inherit;
   background-color: #ffffff;
@@ -30,9 +28,6 @@ const ProductCard = styled(NavLink)`
   }
   width: 40rem;
   max-width: 20rem;
-  
-  ${'' /* margin-left:500px; */}
- 
   @media (min-width: 768px) {
     max-width: 100%;
     margin-left: -5rem;
@@ -42,9 +37,8 @@ const ProductCard = styled(NavLink)`
 const CardImage = styled.img`
   width: 20rem;
   height: 15rem;
-  margin-left:2rem;
-  margin-top:2rem;
-  ${'' /* object-fit: cover; */}
+  margin-left: 2rem;
+  margin-top: 2rem;
 `;
 
 const CardBody = styled.div`

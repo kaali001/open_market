@@ -10,13 +10,13 @@ function ProductForm() {
     price:  0,
     description: "",
     origin: "",
-    image:""
+    product_image:""
   });
 
   // const user = localStorage.getItem("token");
   const [error, setError] = useState("");
 	const navigate = useNavigate();
-
+  const user_id = localStorage.getItem("user_id");
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setProductData({ ...productData, [name]: value });
@@ -28,7 +28,8 @@ function ProductForm() {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:5000/api/products', productData);
+      const response = await axios.post('http://localhost:5000/api/products',{productData,"id": user_id}
+    );
       navigate("/products");
       console.log('Product added:', response.data);
       if (response.ok) {
@@ -110,9 +111,9 @@ function ProductForm() {
           <div className="form-group">
             
             <input type="text"
-               name="image"
+               name="product_image"
                placeholder="Image link"
-               value={productData.image}
+               value={productData.product_image}
                onChange={handleInputChange} 
                required
               />
