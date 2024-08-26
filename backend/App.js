@@ -47,62 +47,53 @@ io.on("connection", (socket) => {
   socket.on("placeBid", async ({ productId, userId, bidAmount }) => {
     console.log("Bid received:", { productId, userId, bidAmount });
 
-    try {
-      // Convert productId to ObjectId if it's not already
-      const objectId = new mongoose.Types.ObjectId(productId);
-
-      // Initialize bid if it doesn't exist
-      if (!activeBids[objectId]) {
-        activeBids[objectId] = {
-          highestBid: bidAmount,
-          highestBidder: userId,
-          timeout: setTimeout(async () => {
-            // Handle transaction on timeout
-            const product = await Product.findById(objectId);
-            console.log("product detail",product);
-            const transaction = new Transaction({
-              buyerID: activeBids[objectId].highestBidder,
-              sellerID: product.userID,
-              productID: objectId,
-              amount: activeBids[objectId].highestBid
-            });
-
-            await transaction.save();
-            io.to(objectId).emit("biddingEnded", transaction);
-
-            delete activeBids[objectId]; // Clean up the bid
-          }, 10000)
-        };
-      } else {
-        // Update bid if already exists
-        clearTimeout(activeBids[objectId].timeout);
-        activeBids[objectId].highestBid = bidAmount;
-        activeBids[objectId].highestBidder = userId;
-        activeBids[objectId].timeout = setTimeout(async () => {
+    // Initialize bid if it doesn't exist
+    if (!activeBids[productId]) {
+      activeBids[productId] = {
+        highestBid: bidAmount,
+        highestBidder: userId,
+        timeout: setTimeout(async () => {
           // Handle transaction on timeout
-          const product = await Product.findById(objectId);
+          const product = await Product.findById(productId);
           const transaction = new Transaction({
-            buyerID: activeBids[objectId].highestBidder,
+            buyerID: activeBids[productId].highestBidder,
             sellerID: product.userID,
-            productID: objectId,
-            amount: activeBids[objectId].highestBid
+            productID: productId,
+            amount: activeBids[productId].highestBid
           });
 
           await transaction.save();
-          io.to(objectId).emit("biddingEnded", transaction);
+          io.to(productId).emit("biddingEnded", transaction);
 
-          delete activeBids[objectId]; // Clean up the bid
-        }, 10000);
-      }
+          delete activeBids[productId]; // Clean up the bid
+        }, 120000)
+      };
+    } else {
+      // Update bid if already exists
+      clearTimeout(activeBids[productId].timeout);
+      activeBids[productId].highestBid = bidAmount;
+      activeBids[productId].highestBidder = userId;
+      activeBids[productId].timeout = setTimeout(async () => {
+        // Handle transaction on timeout
+        const product = await Product.findById(productId);
+        const transaction = new Transaction({
+          buyerID: activeBids[productId].highestBidder,
+          sellerID: product.userID,
+          productID: productId,
+          amount: activeBids[productId].highestBid
+        });
 
-      io.to(objectId).emit("newBid", {
-        highestBid: activeBids[objectId].highestBid,
-        highestBidder: activeBids[objectId].highestBidder
-      });
-    } catch (error) {
-      console.error("Error handling bid:", error);
-      io.to(socket.id).emit("bidError", "Failed to process the bid. Please try again.");
+        await transaction.save();
+        io.to(productId).emit("biddingEnded", transaction);
+
+        delete activeBids[productId]; // Clean up the bid
+      }, 120000);
     }
+
+    io.to(productId).emit("newBid", {
+      highestBid: activeBids[productId].highestBid,
+      highestBidder: activeBids[productId].highestBidder
+    });
   });
 
   socket.on("disconnect", () => {
@@ -113,6 +104,7 @@ io.on("connection", (socket) => {
     });
   });
 });
+
 
 server.listen(port, function () {
   console.log(`Listening to port at ${port}`);

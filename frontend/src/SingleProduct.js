@@ -2,11 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import io from "socket.io-client";
-// import Products from "./Products";
 import axios from "axios"; // Import axios to fetch data from the backend
 
-
-const socket = io("http://localhost:5000"); // Adjust to your server URL
+// const socket = io("http://localhost:5000"); // Adjust to your server URL
 
 const SingleProduct = () => {
   const { id } = useParams(); // Get the product ID from the URL parameters
@@ -15,7 +13,6 @@ const SingleProduct = () => {
   const [highestBid, setHighestBid] = useState(0);
   const [bidStatus, setBidStatus] = useState("Active");
   const user_id = localStorage.getItem("user_id");
-
 
   // Fetch product details from the backend using the ID
   useEffect(() => {
@@ -31,9 +28,12 @@ const SingleProduct = () => {
     fetchProduct();
   }, [id]);
 
-
+  const socket = io("http://localhost:5000");
   useEffect(() => {
     if (product) {
+      // Leave the previous room before joining the new one
+      socket.emit("leaveProductRoom", product._id);
+
       socket.emit("joinProductRoom", product._id);
 
       socket.on("newBid", (bid) => {
@@ -46,7 +46,11 @@ const SingleProduct = () => {
     }
 
     return () => {
-      socket.disconnect();
+      // Ensure socket leaves the current room before disconnecting
+      if (product) {
+        socket.emit("leaveProductRoom", product._id);
+      }
+      socket.disconnect(); // Disconnect socket when component unmounts
     };
   }, [product]);
 
@@ -56,7 +60,7 @@ const SingleProduct = () => {
       userId: user_id,
       bidAmount: parseFloat(bidAmount) // Ensure bidAmount is a number
     });
-    console.log("productID",product._id);
+    console.log("productID", product._id);
   };
 
   if (!product) {
