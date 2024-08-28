@@ -46,9 +46,7 @@ const Footer = () => {
                   <FaInstagram className="icons" />
                 </div>
                 <div>
-                  
                     <FaYoutube className="icons" />
-                  
                 </div>
               </div>
             </div>
@@ -57,7 +55,7 @@ const Footer = () => {
         </div>
 
           <div className="footer-bottom--section">
-            <hr />
+           
             <div className="container grid grid-two-column ">
               <p>
                 @{new Date().getFullYear()}Open Market. All Rights Reserved
@@ -77,34 +75,27 @@ const Footer = () => {
 
 
 const Wrapper = styled.section`
-  .iSIFGq {
-    margin: 0;
-  }
-
-  .contact-short {
-    max-width: 60vw;
-    margin: auto;
-    padding: 5rem 10rem;
-    background-color: ${({ theme }) => theme.colors.bg};
-    border-radius: 1rem;
-    box-shadow: ${({ theme }) => theme.colors.shadowSupport};
-    transform: translateY(50%);
-
-    .grid div:last-child {
-      justify-self: end;
-      align-self: center;
-    }
-  }
-
+  
   footer {
-    padding: 6rem 0 9rem 0;
+
+  //  margin-top: 6rem;
+    padding: 6rem 0 4.5rem 0;
+    
+    border-top: 1px solid #3a4553;
+    top: 100%;
     background-color: ${({ theme }) => theme.colors.footer_bg};
     h3 {
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 700;
       color: ${({ theme }) => theme.colors.hr};
       margin-bottom: 2.4rem;
+
     }
     p {
-      color: ${({ theme }) => theme.colors.white};
+        font-family: inherit;
+      color: #DDD;
+      font-size: 15px !important;
     }
     .footer-social--icons {
       display: flex;
@@ -131,22 +122,18 @@ const Wrapper = styled.section`
     .footer-about-p{
         margin-bottom:2rem;
         margin-left:1rem;
-        text-decoration:underline;
+        // text-decoration:underline;
     }
 
   }
 
   .footer-bottom--section {
-    padding-top: 9rem;
-
-    height:2rem;
+    padding-top: 0.8rem;
+    border-top: 1px solid #3a4553;
+    height:1rem;
     
 
-    hr {
-      margin-bottom: 3rem;
-      color: ${({ theme }) => theme.colors.hr};
-      height: 0.1px;
-    }
+  
   }
 
   @media (max-width: ${({ theme }) => theme.media.mobile}) {
@@ -166,7 +153,7 @@ const Wrapper = styled.section`
     }
 
     .footer-bottom--section {
-      padding-top: 2rem;
+      padding-top: 0.8rem;
     }
   }
 `;

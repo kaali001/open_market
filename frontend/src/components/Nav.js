@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom'; 
 import styled from 'styled-components';
 import { Button } from '../styles/Button';
 
-// Define styled components outside of the Nav component
+
 const Nav = styled.nav`
   .navbar-lists {
     display: flex;
-    gap: 4.8rem;
+    padding: 0 0.8rem 0 4rem;
+    gap: 3rem;
     align-items: center;
-
+    justify-content: flex-end;
     .navbar-link {
       &:link,
       &:visited {
@@ -18,12 +19,54 @@ const Nav = styled.nav`
         font-size: 1.8rem;
         font-weight: 500;
         text-transform: uppercase;
-        color: ${({ theme }) => theme.colors.black};
+        color: ${({ theme }) => theme.colors.white};
         transition: color 0.3s linear;
       }
       &:hover,
       &:active {
         color: ${({ theme }) => theme.colors.helper};
+      }
+    }
+  }
+
+  .profile-pic-container { 
+    position: relative;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+     left: -5%;
+
+    img {
+      border-radius: 50%;
+      height: 4rem;
+      width: 4rem;
+      border: 2px solid green;  
+    }
+
+    .profile-popup { 
+      position: absolute;
+      top: 100%;
+      right: -25px;
+      background-color: #fff;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      display: none;
+      flex-direction: column;
+      width: 10rem;
+    }
+
+    &:hover .profile-popup {
+      display: flex;
+    }
+
+    .popup-item {
+      padding: 10px;
+      text-align: center;
+      font-size:1.2rem;
+      cursor: pointer;
+      &:hover {
+        background-color: ${({ theme }) => theme.colors.helper};
+        color: #fff;
       }
     }
   }
@@ -47,11 +90,12 @@ const Nav = styled.nav`
 
     .cart-trolley {
       position: relative;
-      height: 6.2rem;
+      height: 4rem;
     }
     .cart-total--item {
-      width: 2.4rem;
-      height: 2.4rem;
+      width: 1.4rem;
+      height: 1.4rem;
+      font-size:1rem;
       position: absolute;
       background-color: ${({ theme }) => theme.colors.helper};
       color: #fff;
@@ -78,7 +122,7 @@ const Nav = styled.nav`
       border: ${({ theme }) => theme.colors.black};
 
       .toggle-icon {
-        font-size: 4.2rem;
+        font-size: 3.2rem;
         color: ${({ theme }) => theme.colors.black};
       }
     }
@@ -86,7 +130,7 @@ const Nav = styled.nav`
       display: none;
       font-size: 4.2rem;
       position: absolute;
-      top: 30%;
+      top: 10%;
       right: 10%;
       color: ${({ theme }) => theme.colors.black};
       z-index: 9999;
@@ -123,6 +167,7 @@ const Nav = styled.nav`
 
       .navbar-link {
         font-size: 4.2rem;
+        color: black;
       }
     }
     .cart-trolley--link {
@@ -130,15 +175,21 @@ const Nav = styled.nav`
 
       .cart-trolley {
         position: relative;
-        height: 8.2rem;
+        height: 4.2rem;
       }
 
       .cart-total--item {
-        width: 4.2rem;
-        height: 4.2rem;
+        width: 3.2rem;
+        height: 3.2rem;
         font-size: 2rem;
       }
     }
+
+      .profile-pic-container { /* New styles for profile picture container */
+        position: relative;
+        left: 0%;
+        cursor: pointer;
+      }
 
     .user-logout,
     .user-login {
@@ -149,11 +200,13 @@ const Nav = styled.nav`
 `;
 
 const Navbar = () => {
-  const [menuIcon, setMenuIcon] = useState();
+  const [menuIcon, setMenuIcon] = useState(false); // Added initial state for menuIcon
+  const navigate = useNavigate(); // Added navigate for redirection
   const isLoggedin = window.localStorage.getItem("isLoggedIn");
 
   const logoutUser = () => {
     window.localStorage.clear();
+    navigate("/"); // Redirect to home after logout
   };
 
   return (
@@ -178,11 +231,15 @@ const Navbar = () => {
               <span className='cart-total--item'>0</span>
             </NavLink>
           </li>
-          {isLoggedin === "true" ? (
-            <li>
-              <NavLink to={"/"}>
-                <Button onClick={logoutUser}>Logout</Button>
-              </NavLink>
+
+          {isLoggedin === "true" ? ( // Profile pic and popup menu if logged in
+            <li className='profile-pic-container'>
+              <img src='/images/avatar.svg' alt='Profile' />
+              <div className='profile-popup'>
+                <div className='popup-item' onClick={() => navigate('/user-profile')}>Account</div>
+                <div className='popup-item' onClick={() => navigate('/user-profile#be-seller')}>Be Seller</div>
+                <div className='popup-item' onClick={logoutUser}>Logout</div>
+              </div>
             </li>
           ) : (
             <li>

@@ -18,7 +18,7 @@ import ProductForm from "./ProductForm";
 import { GlobalStyle } from "./GlobalStyle";
 import { ThemeProvider } from "styled-components";
 import Header from "./components/Header";
-
+import UserProfilePage from "./UserProfile";
 
 
 function App() {
@@ -35,8 +35,12 @@ function App() {
       green:"rgb(54, 156, 54)",
       black: "#212529",
       helper: "#8490ff",
-      bg: "#F6F8FA",
-      footer_bg: "#3c3f46",
+      bg: "#131921",
+      nav:"#131921",
+      services:"#37475A",
+      trusted:"#232f3e",
+      footer_bg: "#131A22",
+      
       btn: "rgb(98 84 243)",
       border: "rgba(98, 84, 243, 0.5)",
       hr: "#ffffff",
@@ -66,6 +70,8 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/products" element={<Voov />} />
           {user&&<Route path="/product-form" element={<ProductForm/>} />}
+          {user&&<Route path="/user-profile" element={<UserProfilePage/>} />}
+          
           <Route path="/aboutproduct/:id" element={<SingleProduct />} /> {/*// shows the product details page. */}
           <Route path="/contact" element={<Contact />} />
           <Route path="/login" element={<Login />} />

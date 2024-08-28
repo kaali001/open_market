@@ -47,7 +47,7 @@ const Services = () => {
 
 const Wrapper = styled.section`
   padding: 9rem 0;
-
+  background:#fff;
   .grid {
     gap: 4.8rem;
   }
@@ -61,7 +61,7 @@ const Wrapper = styled.section`
     flex-direction: column;
     justify-content: center;
     align-content: center;
-    background: ${({ theme }) => theme.colors.bg};
+    background: ${({ theme }) => theme.colors.services};
     text-align: center;
     border-radius: 2rem;
     box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
@@ -73,7 +73,7 @@ const Wrapper = styled.section`
     box-shadow: none;
 
     .services-colum-2 {
-      background: ${({ theme }) => theme.colors.bg};
+      background: ${({ theme }) => theme.colors.services};
       display: flex;
       flex-direction: row;
       flex: 1;
@@ -95,6 +95,7 @@ const Wrapper = styled.section`
   h3 {
     margin-top: 1.4rem;
     font-size: 2rem;
+    color:#DDD;
   }
 
   .icon {
@@ -104,7 +105,7 @@ const Wrapper = styled.section`
     padding: 2rem;
     border-radius: 50%;
     background-color: #fff;
-    color: #5138ee;
+    color:green;
   }
 `;
 export default Services;

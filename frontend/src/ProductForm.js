@@ -7,7 +7,7 @@ import {useNavigate } from "react-router-dom";
 function ProductForm() {
   const [productData, setProductData] = useState({
     product_name: "",
-    price:  0,
+    price:"",
     description: "",
     origin: "",
     product_image:""
@@ -136,8 +136,8 @@ const Wrapper = styled.section`
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  margin-top:-2rem;
+  height: 85vh;
+  margin-top:2rem;
   
  
   background-color: white;

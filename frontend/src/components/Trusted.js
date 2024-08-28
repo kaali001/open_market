@@ -45,16 +45,16 @@ const Trusted = () => {
 };
 
 const Wrapper = styled.section`
-  padding: 9rem 0;
-  background-color: ${({ theme }) => theme.colors.bg};
+  // padding: 9rem 0;
+  background-color: ${({ theme }) => theme.colors.trusted};
 
-  .brand-section {
-    padding: 12rem 0 0 0;
+  .container{
+    padding: 3rem 0;
   }
   h3 {
     text-align: center;
     text-transform: capitalize;
-    color: ${({ theme }) => theme.colors.text};
+    color: white;
     font-size: 2rem;
     font-weight: bold;
   }
