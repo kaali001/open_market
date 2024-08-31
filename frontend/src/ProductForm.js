@@ -14,6 +14,7 @@ function ProductForm() {
   });
 
   // const user = localStorage.getItem("token");
+  const token = localStorage.getItem('token');
   const [error, setError] = useState("");
 	const navigate = useNavigate();
   const user_id = localStorage.getItem("user_id");
@@ -28,7 +29,12 @@ function ProductForm() {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:5000/api/products',{productData,"id": user_id}
+      const response = await axios.post('http://localhost:5000/api/products/add',{productData,"id": user_id},
+      {
+        headers: {
+          'x-auth-token': token,
+        }
+      }
     );
       navigate("/products");
       console.log('Product added:', response.data);
@@ -147,8 +153,9 @@ const Wrapper = styled.section`
   background-color: #ffffff;
   padding: 15px;
   border-radius: 10px;
-	box-shadow: 0px 3px 3px -2px rgb(0 0 0 / 20%),
-		0px 3px 4px 0px rgb(0 0 0 / 14%), 0px 1px 8px 0px rgb(0 0 0 / 12%);
+   border: 1px solid #dee2e6;
+	// box-shadow: 0px 3px 3px -2px rgb(0 0 0 / 20%),
+	// 	0px 3px 4px 0px rgb(0 0 0 / 14%), 0px 1px 8px 0px rgb(0 0 0 / 12%);
   ${'' /* height:50rem; */}
   width: 100%;
   max-width: 500px; 

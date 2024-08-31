@@ -26,11 +26,11 @@ const ProductCard = styled(NavLink)`
   &:hover {
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
   }
-  width: 40rem;
+  width: 35rem;
   max-width: 20rem;
   @media (min-width: 768px) {
     max-width: 100%;
-    margin-left: -5rem;
+    margin-left: -2rem;
   }
 `;
 

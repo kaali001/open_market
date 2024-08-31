@@ -12,6 +12,8 @@ const Signup = () => {
 		email: "",
 		phone: "",
 		password: "",
+		address: "",
+		pincode:"",
 	});
 	const [error, setError] = useState("");
 	const navigate = useNavigate();
@@ -23,7 +25,7 @@ const Signup = () => {
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		try {
-			const url = "http://localhost:5000/api/users";
+			const url = "http://localhost:5000/api/users/signup";
 			const { data: res } = await axios.post(url, data);
 			navigate("/");
 			console.log(res.message);
@@ -79,6 +81,25 @@ const Signup = () => {
 							name="phone"
 							onChange={handleChange}
 							value={data.phone}
+							required
+							className={"input"}
+						/>
+						
+						<input
+							type="text"
+							placeholder="Address"
+							name="address"
+							onChange={handleChange}
+							value={data.address}
+							required
+							className={"input"}
+						/>
+						  <input
+							type="Numeric"
+							placeholder="Pincode"
+							name="pincode"
+							onChange={handleChange}
+							value={data.pincode}
 							required
 							className={"input"}
 						/>

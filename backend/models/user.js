@@ -24,22 +24,29 @@ const user_schema =new mongoose.Schema({
         type:Number,
         required:true
         
-
     },
     password :{
         type:String,
         required:true  
+    },
+    
+    address: {
+         type: String ,
+         required:true 
+    },
+    pincode :{
+        type:Number,
+        required:true
+
+    },
+    balance: { 
+         type: Number,
+        default: 0 
     }
 
 })
 
 
-// user_schema.methods.generateAuthToken = function () {
-// 	const token = jwt.sign({ _id: this._id }, process.env.JWTPRIVATEKEY, {
-// 		expiresIn: "5d",
-// 	});
-// 	return token;
-// };
 
 user_schema.methods.generateAuthToken = function () {
     try {
@@ -67,6 +74,8 @@ const validate = (data) => {
         email: Joi.string().email().required().label("email"),
         phone: Joi.number().required().label("phone"),
         password: Joi.string().required().label("password"),
+        pincode: Joi.number().required().label("pincode"),
+        address: Joi.string().required().label("address"),
     });
     return schema.validate(data);
 };

@@ -40,10 +40,10 @@ const Filter = ({ onFilter }) => {
 };
 
 const FilterPanel = styled.div`
-  width: 18%;
+  width: 15%;
   height: 80vh;
   position: absolute;
-  top: 12rem;
+  top: 10rem;
   left: 0rem;
   background-color: #fff;
   box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.2);

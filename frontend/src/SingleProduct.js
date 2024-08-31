@@ -4,19 +4,18 @@ import styled from "styled-components";
 import io from "socket.io-client";
 import axios from "axios";
 
-
-
 const SingleProduct = () => {
   const { id } = useParams(); // Get the product ID from the URL parameters
   const [product, setProduct] = useState(null); 
-  const [bidAmount, setBidAmount] = useState(0);
+  const [bidAmount, setBidAmount] = useState();
   const [highestBid, setHighestBid] = useState(0);
   const [bidStatus, setBidStatus] = useState("active");
   const [timer, setTimer] = useState(0);
   const [isRobotButtonActive, setIsRobotButtonActive] = useState(false);
+  const [bidHistory, setBidHistory] = useState([]); // State to store bid history
   const user_id = localStorage.getItem("user_id");
+  const token = localStorage.getItem("token");
   const timerRef = useRef(null);
-
 
   const socket = useRef(null);
 
@@ -45,54 +44,93 @@ const SingleProduct = () => {
   useEffect(() => {
     if (product) {
       // Leave the previous room before joining the new one
-      socket.current.emit("leaveProductRoom", product._id);
+      // socket.current.emit("leaveProductRoom", product._id);
 
       socket.current.emit("joinProductRoom", product._id);
 
       socket.current.on("newBid", (bid) => {
-        setHighestBid(bid.highestBid);
+        if (bid && bid.highestBid) {
+          setHighestBid(bid.highestBid);
+          setTimer(Math.floor(bid.remainingTime / 1000));
+          // Update bid history with new bid if the bid is valid
+          setBidHistory((prev) => [...prev, bid]);
+        }
       });
-
-      socket.current.on("biddingEnded", (transaction) => {
-        setBidStatus(`Sold to user ${transaction.buyerID} for $${transaction.amount}`);
-        clearInterval(timerRef.current); // Stop the timer when bidding ends
-      });
+     
+    socket.current.on("biddingEnded", (transaction) => {
+      setBidStatus(`Sold to userId: ${transaction.buyerID} for $${transaction.amount}`);
+      clearInterval(timerRef.current); // Stop the timer when bidding ends
+    });
     }
 
     return () => {
-
       if (product) {
         socket.current.emit("leaveProductRoom", product._id);
       }
-    
     };
   }, [product]);
 
+
+  useEffect(() => {
+    if (timer > 0) {
+      // setTimer(120); 
+      timerRef.current = setInterval(() => {
+        setTimer((prev) => {
+          if (prev <= 1) {
+            clearInterval(timerRef.current);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else {
+      clearInterval(timerRef.current);
+    }
+
+    return () => clearInterval(timerRef.current); // Cleanup on unmount
+  }, [timer]);
+
+
   const handleBid = () => {
-    if (bidAmount <= highestBid || bidAmount<=product.price) {
-      alert("Bid amount must be higher than the current highest bid.");
-      setTimer(120);
+    if (!user_id || !token) {
+      alert("Please log in to place a bid.");
       return;
     }
-    socket.current.emit("placeBid", {
+
+    if (bidAmount <= highestBid || bidAmount <= product.price) {
+      alert("Bid amount must be higher than the current highest bid and Starting price.");
+      return;
+    }
+
+    const newBid = {
       productId: product._id,
       userId: user_id,
       bidAmount: parseFloat(bidAmount),
-    });
+      createdAt: new Date(), // Include bid creation time
+    };
+
+    socket.current.emit("placeBid", newBid);
     setIsRobotButtonActive(true); 
 
     // Start the timer
-    setTimer(120); // 2 minutes countdown
-    timerRef.current = setInterval(() => {
-      setTimer((prev) => {
-        if (prev <= 1) {
-          clearInterval(timerRef.current);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+    // setTimer(120); // 2 minutes countdown
+    // timerRef.current = setInterval(() => {
+    //   setTimer((prev) => {
+    //     if (prev <= 1) {
+    //       clearInterval(timerRef.current);
+    //       return 0;
+    //     }
+    //     return prev - 1;
+    //   });
+    // }, 1000); 
+  
+    // Add the new bid to the bid history
+    // if (newBid.bidAmount) {
+    //   setBidHistory((prev) => [...prev, newBid]);
+    // }
   };
+
+
 
   if (!product) {
     return <div>Product not found</div>;
@@ -102,22 +140,34 @@ const SingleProduct = () => {
 
   return (
     <ProductContainer>
-      
       <ProductInfo>
         <ProductImage src={product_image} alt={product_name} />
-        
         <ProductDetails>
-        <StatusSection>
-        <RobotButton isactive={isRobotButtonActive ? 'true' : undefined}></RobotButton>
+          <StatusSection>
+            <RobotButton isactive={isRobotButtonActive ? 'true' : undefined}></RobotButton>
+            <BidStatus>Status: {bidStatus}</BidStatus>
+          </StatusSection>
 
-        <BidStatus>Status: {bidStatus}</BidStatus>
-      </StatusSection>
-        
           <ProductName>{product_name}</ProductName>
           <ProductPrice>Starting Price: ${price}</ProductPrice>
           <HighestBid>Highest Bid: ${highestBid}</HighestBid>
+
+          {/* Bid History Section */}
+          <BidHistoryContainer>
+            {bidHistory.map((bid, index) => (
+              <BidHistoryItem key={index}>
+                <p>User ID: {bid.highestBidder}</p>
+                <p>Bid Amount: ${bid.highestBid}</p>
+               
+                <p>Time Left: {Math.floor(bid.remainingTime / 60000)}:{((bid.remainingTime % 60000) / 1000).toFixed(0).padStart(2, '0')}</p>
+                <span className="createdAt">{new Date(bid.createdAt).toLocaleString()}</span>
+              </BidHistoryItem>
+            ))}
+          </BidHistoryContainer>
+
           <BidInput
             type="number"
+            placeholder="Enter your bid"
             value={bidAmount}
             onChange={(e) => setBidAmount(e.target.value)}
           />
@@ -125,15 +175,38 @@ const SingleProduct = () => {
           <Timer>{timer > 0 ? `Time Left: ${Math.floor(timer / 60)}:${(timer % 60).toString().padStart(2, '0')}` : "Bidding Ended"}</Timer>
         </ProductDetails>
       </ProductInfo>
-      
       <ProductDescription>{description}</ProductDescription>
     </ProductContainer>
   );
 };
 
+// Styled Components for Bid History Section
+const BidHistoryContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 10px;
+
+  .createdAt{
+ 
+  margin-left:200px;
+  }
+`;
+
+const BidHistoryItem = styled.div`
+  background-color: #f8f8f8;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  width: 100%;
+  max-width: 350px;
+
+  
+
+
+`;
+
 const ProductContainer = styled.div`
-  // display: flex;
-  // flex-direction: column;
   padding: 20px;
   width: 100%;
   max-width: 800px;
@@ -148,9 +221,7 @@ const ProductInfo = styled.div`
 `;
 
 const StatusSection = styled.div`
- 
   justify-content: space-between;
-
   max-width: 800px;
   margin-bottom: 10px;
 `;
@@ -161,7 +232,7 @@ const RobotButton = styled.button`
   border-radius: 50%;
   background-color: ${({ isactive }) => (isactive ? 'green' : 'gray')};
   border: none;
-  ${({ isactive }) => isactive && 'isactive: true;'} // Only apply when isActive is true
+  ${({ isactive }) => isactive && 'isactive: true;'} 
 `;
 
 const ProductImage = styled.img`
@@ -171,8 +242,8 @@ const ProductImage = styled.img`
   margin-bottom: 20px;
   box-sizing: border-box;
   margin-top:30px;
-  border: 1px solid #ccc; /* Add a border */
-  border-radius: 5px; /* Make the corners rounded */
+  border: 1px solid #ccc; 
+  border-radius: 5px;
 `;
 
 const ProductDetails = styled.div`
@@ -183,9 +254,8 @@ const ProductName = styled.h2`
   font-size: 24px;
   margin-bottom: 10px;
   line-height: 2.4;
-    
-    font-weight: 10pt;
-    display: inline-block;
+  font-weight: 10pt;
+  display: inline-block;
 `;
 
 const ProductDescription = styled.p`
@@ -235,7 +305,6 @@ const Timer = styled.p`
 const BidStatus = styled.p`
   font-size: 16px;
   color: #333;
-  // margin-top: 20px;
 `;
 
 export default SingleProduct;

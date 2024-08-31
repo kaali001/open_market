@@ -1,20 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import styled from 'styled-components';
 import {useNavigate } from 'react-router-dom'; 
-
+import { FaPen } from 'react-icons/fa';
 import ProductForm from './ProductForm';
+
+
 
 const ProfilePageWrapper = styled.div`
   display: flex;
   min-height: 100vh;
   padding: 20px;
   background-color: ${({ theme }) => theme.colors.lightGray};
-
+ 
   .sidebar {
     width: 20%;
     background-color: ${({ theme }) => theme.colors.white};
     padding: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    // box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+     border: 1px solid #dee2e6;
     border-radius: 8px;
     display: flex;
     flex-direction: column;
@@ -80,31 +84,79 @@ const ProfilePageWrapper = styled.div`
   .content {
     width: 75%;
     padding-left: 40px;
-
-    .card {
+  .card {
       background-color: ${({ theme }) => theme.colors.white};
       padding: 20px;
       border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      // box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      border: 1px solid #dee2e6;
       margin-bottom: 20px;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
 
-      .card-title {
-        font-size: 2rem;
-        font-weight: bold;
-        margin-bottom: 10px;
+      .card-header {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+
+        .Account-card-title {
+          font-size: 2rem;
+          font-weight: bold;
+          margin-left:30rem;
+          margin-bottom: 30px;
+        }
+
+        .edit-icon {
+          cursor: pointer;
+          
+        }
       }
 
-      .card-content {
+      .card-title {
+          font-size: 2rem;
+          font-weight: bold;
+          // margin-left:30rem;
+          margin-bottom: 30px;
+        }
+
+      .form-card-content {
         font-size: 1.4rem;
         color: ${({ theme }) => theme.colors.gray};
+        width: 100%;
+        padding-left:20rem;
+
+        
+        .form-field {
+          margin-bottom: 15px;
+          display: flex;
+          flex-direction: column;
+          box-shadow: none;
+
+          label {
+            font-weight: bold;
+            margin-bottom: 5px;
+          }
+
+          input {
+            outline: none;
+	          border: none;
+            padding: 10px;
+            border-radius: 5px;
+            
+            font-size: 1.4rem;
+          }
+
+          input[disabled] {
+            background-color: #edf5f3;
+          }
+        }
       }
     }
   }
-
   @media (max-width: 768px) {
     flex-direction: column;
 
@@ -120,12 +172,93 @@ const ProfilePageWrapper = styled.div`
   }
 `;
 
+
+
 const UserProfilePage = () => {
+
+  const userId = localStorage.getItem("user_id"); 
+  const token = localStorage.getItem('token');
+
   const [activeMenu, setActiveMenu] = useState('Account');
+  const [userDetails, setUserDetails] = useState({});
+  const [boughtItems, setBoughtItems] = useState([]);
+  const [balance, setBalance] = useState(0);
+  const [isEditing, setIsEditing] = useState(false);
   const navigate = useNavigate();
   const logoutUser = () => {
     window.localStorage.clear();
-    navigate("/"); // Redirect to home after logout
+    navigate("/"); 
+  };
+
+
+  useEffect(() => {
+    fetchContent();
+  }, [activeMenu]);
+
+  const fetchContent = async () => {
+  
+    if (activeMenu === 'Account') {
+      const response = await axios.get(`http://localhost:5000/api/users/account/${userId}`,
+        {
+         headers: {
+           'x-auth-token': token,
+          }
+       }
+      );
+      setUserDetails(response.data);
+    } else if (activeMenu === 'Bought items') {
+      const response = await axios.get(`http://localhost:5000/api/users/bought-items/${userId}`,
+        {
+          headers: {
+             'x-auth-token': token,
+           }
+        }
+      );
+      setBoughtItems(response.data);
+    } else if (activeMenu === 'Amount') {
+      const response = await axios.get(`http://localhost:5000/api/users/balance/${userId}`,
+        {
+         headers: {
+            'x-auth-token': token,
+          }
+        }
+      );
+      setBalance(response.data.balance);
+    }
+  };
+
+  const handleEditToggle = () => {
+    setIsEditing(!isEditing);
+  };
+
+  const handleFormChange = (e) => {
+    setUserDetails({
+      ...userDetails,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSaveDetails = async () => {
+  
+    await axios.patch(`http://localhost:5000/api/users/account/${userId}`, userDetails,
+      {
+        headers: {
+          'x-auth-token': token,
+         }
+      }
+    );
+    setIsEditing(false);
+  };
+
+  const handleAddBalance = async (amount) => {
+    await axios.post(`http://localhost:5000/api/users/balance/${userId}`, { amount },
+      {
+        headers: {
+          'x-auth-token': token,
+         }
+      }
+    );
+    fetchContent();
   };
 
 
@@ -134,8 +267,69 @@ const UserProfilePage = () => {
       case 'Account':
         return (
           <div className="card">
-            <div className="card-title">Account Information</div>
-            <div className="card-content">Details about your account.</div>
+            <div className="card-header">
+              <div className="Account-card-title">Account Information</div>
+              <FaPen   className="edit-icon"
+                onClick={handleEditToggle}
+              />
+            </div>
+            <div className="form-card-content">
+              <div className="form-field">
+                <label>Name</label>
+                <input
+                  type="text"
+                  name="Name"
+                  value={userDetails.Name || ''}
+                  onChange={handleFormChange}
+                  disabled={!isEditing}
+                />
+              </div>
+              <div className="form-field">
+                <label>Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={userDetails.email || ''}
+                  disabled
+                />
+              </div>
+              <div className="form-field">
+                <label>Phone</label>
+                <input
+                  type="Numeric"
+                  name="phone"
+                  value={userDetails.phone || ''}
+                  onChange={handleFormChange}
+                  disabled={!isEditing}
+                />
+              </div>
+              <div className="form-field">
+                <label>Address</label>
+                <input
+                  type="text"
+                  name="address"
+                  value={userDetails.address || ''}
+                  onChange={handleFormChange}
+                  disabled={!isEditing}
+                />
+              </div>
+              <div className="form-field">
+                <label>Pincode</label>
+                <input
+                  type="Numeric"
+                  name="pincode"
+                  value={userDetails.pincode || ''}
+                  onChange={handleFormChange}
+                  disabled={!isEditing}
+                />
+              </div>
+
+              {isEditing && (
+                <button onClick={handleSaveDetails}>
+                  Save
+                </button>
+              )}
+            </div>
           </div>
         );
       case 'Bought items':
