@@ -5,6 +5,21 @@ import {useNavigate } from 'react-router-dom';
 import { FaPen } from 'react-icons/fa';
 import ProductForm from './ProductForm';
 
+// Load Razorpay script dynamically
+const loadScript = (src) => {
+  return new Promise((resolve) => {
+    const script = document.createElement('script');
+    script.src = src;
+    script.onload = () => {
+      resolve(true);
+    };
+    script.onerror = () => {
+      resolve(false);
+    };
+    document.body.appendChild(script);
+  });
+};
+
 
 
 const ProfilePageWrapper = styled.div`
@@ -155,6 +170,31 @@ const ProfilePageWrapper = styled.div`
           }
         }
       }
+
+    .add-balance-section {
+        margin-top: 20px;
+        text-align: center;
+
+        input {
+          padding: 10px;
+          font-size: 1.4rem;
+          margin-right: 10px;
+        }
+
+        button {
+          padding: 10px 20px;
+          font-size: 1.4rem;
+          background-color: rgb(98 84 243);
+          color: ${({ theme }) => theme.colors.white};
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+
+          &:hover {
+            background-color: ${({ theme }) => theme.colors.darkPrimary};
+          }
+        }
+      }
     }
   }
   @media (max-width: 768px) {
@@ -183,6 +223,8 @@ const UserProfilePage = () => {
   const [userDetails, setUserDetails] = useState({});
   const [boughtItems, setBoughtItems] = useState([]);
   const [balance, setBalance] = useState(0);
+  const [amountToAdd, setAmountToAdd] = useState(500);
+
   const [isEditing, setIsEditing] = useState(false);
   const navigate = useNavigate();
   const logoutUser = () => {
@@ -215,7 +257,7 @@ const UserProfilePage = () => {
         }
       );
       setBoughtItems(response.data);
-    } else if (activeMenu === 'Amount') {
+    } else if (activeMenu === 'Balance') {
       const response = await axios.get(`http://localhost:5000/api/users/balance/${userId}`,
         {
          headers: {
@@ -250,6 +292,7 @@ const UserProfilePage = () => {
     setIsEditing(false);
   };
 
+
   const handleAddBalance = async (amount) => {
     await axios.post(`http://localhost:5000/api/users/balance/${userId}`, { amount },
       {
@@ -259,6 +302,82 @@ const UserProfilePage = () => {
       }
     );
     fetchContent();
+  };
+
+
+const handlePayment = async () => {
+    const res = await loadScript('https://checkout.razorpay.com/v1/checkout.js');
+
+    if (!res) {
+      alert('Razorpay SDK failed to load. Are you online?');
+      return;
+    }
+
+    const result = await fetch('http://localhost:5000/api/users/payment/create-order', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-auth-token': token,
+      },
+      body: JSON.stringify({ amount: amountToAdd }),
+    });
+
+    const { order } = await result.json();
+
+    if (!order) {
+      alert('Server error. Are you online?');
+      return;
+    }
+
+    const options = {
+      key: process.env.RAZORPAY_KEY_ID,
+      amount: order.amount,
+      currency: 'INR',
+      name: 'U-mart',
+      description: 'Add Balance to Account',
+      order_id: order.id,
+      handler: async function (response) {
+        const verifyUrl = 'http://localhost:5000/api/users/payment/verify-payment';
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = response;
+
+        const data = {
+          razorpay_order_id,
+          razorpay_payment_id,
+          razorpay_signature,
+          amount: amountToAdd,
+        };
+
+        const verifyResponse = await fetch(verifyUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-auth-token': token,
+          },
+          body: JSON.stringify(data),
+        });
+
+        const result = await verifyResponse.json();
+
+        if (result.success) {
+          alert('Payment successful and balance updated!');
+          setBalance(balance + parseInt(amountToAdd)); // Update balance in UI
+          setAmountToAdd(500);
+        } else {
+          alert('Payment verification failed!');
+        }
+      },
+      prefill: {
+        name: userDetails.Name,
+        email: userDetails.email,
+        contact: userDetails.phone, 
+      },
+      theme: {
+        color: '#2a7bf5',
+      },
+    };
+
+    const paymentObject = new window.Razorpay(options);
+    paymentObject.open();
   };
 
 
@@ -343,7 +462,18 @@ const UserProfilePage = () => {
         return (
           <div className="card">
             <div className="card-title">Your Balance</div>
-            <div className="card-content">Your total expenditure and balance.</div>
+            <div className="card-content">
+              <p>Your Current Balance: ₹{balance}</p>
+              <div className="add-balance-section">
+                <input
+                  type="Numeric"
+                  value={amountToAdd}
+                  onChange={(e) => setAmountToAdd(e.target.value)}
+                  placeholder="Enter amount"
+                />
+                <button onClick={handlePayment}>Add Balance</button>
+              </div>
+            </div>
           </div>
         );
       case 'Sell items':
