@@ -6,7 +6,7 @@ const jwt=require('jsonwebtoken');
 const Joi=require('joi');
 const passwordComplexity= require('joi-password-complexity');
 
-
+dotenv.config({ path: './config.env' });
 
 
 // defining schema of the table to store data in this format

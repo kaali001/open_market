@@ -5,17 +5,17 @@ const mongoose = require('mongoose');
 const transactionSchema = new mongoose.Schema({
   buyerID: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'user',
     required: true
   },
   sellerID: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'user',
     required: true
   },
   productID: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Product',
+    ref: 'product',
     required: true
   },
   transactionDate: {

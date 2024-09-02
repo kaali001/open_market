@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
 import {useNavigate } from 'react-router-dom'; 
@@ -32,7 +32,6 @@ const ProfilePageWrapper = styled.div`
     width: 20%;
     background-color: ${({ theme }) => theme.colors.white};
     padding: 20px;
-    // box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
      border: 1px solid #dee2e6;
     border-radius: 8px;
     display: flex;
@@ -63,7 +62,6 @@ const ProfilePageWrapper = styled.div`
       padding: 10px 20px;
       justify-content: center;
       align-items:left;
-    //  text-align: left;
       border-radius: 8px;
       width: 100%; /* Full width for better button-like appearance */
       box-sizing: border-box;
@@ -103,7 +101,6 @@ const ProfilePageWrapper = styled.div`
       background-color: ${({ theme }) => theme.colors.white};
       padding: 20px;
       border-radius: 8px;
-      // box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
       border: 1px solid #dee2e6;
       margin-bottom: 20px;
       display: flex;
@@ -134,7 +131,6 @@ const ProfilePageWrapper = styled.div`
       .card-title {
           font-size: 2rem;
           font-weight: bold;
-          // margin-left:30rem;
           margin-bottom: 30px;
         }
 
@@ -171,7 +167,7 @@ const ProfilePageWrapper = styled.div`
         }
       }
 
-    .add-balance-section {
+     .add-balance-section {
         margin-top: 20px;
         text-align: center;
 
@@ -195,6 +191,49 @@ const ProfilePageWrapper = styled.div`
           }
         }
       }
+     .item-card {
+          display: flex;
+          align-items: center;
+          margin-bottom: 20px;
+          border: 1px solid #ddd;
+          padding: 10px;
+          border-radius: 8px;
+
+        .createdAt {
+          margin-left:200px;
+        }
+        .item-image {
+          width: 100px;
+          height: 100px;
+          margin-right: 25px;
+          object-fit: cover;
+          border-radius: 8px;
+        }
+
+        .item-details {
+          flex: 1;
+        }
+
+        .item-details p {
+          margin: 5px 0;
+        }
+     }
+     
+     .empty-card {
+       align-items: center;
+       justify-content: center;
+       padding:130px 0;
+       color:#e4ecf5 ;
+      
+       .empty-icon{
+           width: 120px;
+          z-index:-10;
+       }
+
+
+     
+     
+     }
     }
   }
   @media (max-width: 768px) {
@@ -233,11 +272,8 @@ const UserProfilePage = () => {
   };
 
 
-  useEffect(() => {
-    fetchContent();
-  }, [activeMenu]);
 
-  const fetchContent = async () => {
+  const fetchContent = useCallback(async () => {
   
     if (activeMenu === 'Account') {
       const response = await axios.get(`http://localhost:5000/api/users/account/${userId}`,
@@ -267,7 +303,14 @@ const UserProfilePage = () => {
       );
       setBalance(response.data.balance);
     }
-  };
+  }, [activeMenu, token, userId]);
+
+
+  useEffect(() => {
+    fetchContent();
+  }, [fetchContent]);
+
+
 
   const handleEditToggle = () => {
     setIsEditing(!isEditing);
@@ -290,18 +333,6 @@ const UserProfilePage = () => {
       }
     );
     setIsEditing(false);
-  };
-
-
-  const handleAddBalance = async (amount) => {
-    await axios.post(`http://localhost:5000/api/users/balance/${userId}`, { amount },
-      {
-        headers: {
-          'x-auth-token': token,
-         }
-      }
-    );
-    fetchContent();
   };
 
 
@@ -455,9 +486,29 @@ const handlePayment = async () => {
         return (
           <div className="card">
             <div className="card-title">Bought Items</div>
-            <div className="card-content">List of items you have purchased.</div>
+            <div className="card-content">
+        {boughtItems.length > 0 ? (
+          boughtItems.map((item, index) => (
+            <div key={index} className="item-card">
+              <img src={item.productID.product_image} alt={item.productID.product_name} className="item-image" />
+              <div className="item-details">
+                <p><strong>Item:</strong> {item.productID.product_name}</p>
+                <p><strong>Asked Price:</strong> ${item.productID.price}</p>
+                <p><strong>Closing Bid:</strong> ${item.amount}</p>
+                <span className="createdAt"> {new Date(item.transactionDate).toLocaleString()}</span>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className='empty-card'>
+         
+          <img src='/images/emp-icon.png' className='empty-icon' alt='empty-cart' />
+          <p>No items bought yet.</p>
           </div>
-        );
+        )}
+      </div>
+    </div>
+  );
       case 'Balance':
         return (
           <div className="card">

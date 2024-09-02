@@ -1,7 +1,8 @@
 // controllers/userController.js
 
 const { User, validate } = require("../models/user");
-const  BoughtItem  = require('../models/transaction'); //the model for bought items
+const  BoughtItem  = require('../models/transaction'); 
+const Products= require("../models/product");
 const bcrypt = require("bcrypt");
 const Joi = require("joi");
 const jwt = require('jsonwebtoken');
@@ -88,15 +89,24 @@ exports.updateUserDetails = async (req, res) => {
   }
 };
 
+
 // Fetch bought items
 exports.getUserBoughtItems = async (req, res) => {
   try {
-    const items = await BoughtItem.find({ buyerID: req.params.userId });
-    res.status(200).json(items);
+    // Find transactions where the user is the buyer and then populate product details from Product model.
+    const transaction = await BoughtItem.find({ buyerID: req.params.userId })
+      .populate('productID', 'product_name price product_image'); 
+
+    if (transaction.length > 0) {
+      res.status(200).json(transaction);
+    } else {
+      res.status(200).json({ message: 'No bought items found' });
+    }
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Server error', error: error.message }); 
   }
 };
+
 
 // Fetch user balance
 exports.getUserBalance = async (req, res) => {

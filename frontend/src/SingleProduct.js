@@ -112,22 +112,6 @@ const SingleProduct = () => {
     socket.current.emit("placeBid", newBid);
     setIsRobotButtonActive(true); 
 
-    // Start the timer
-    // setTimer(120); // 2 minutes countdown
-    // timerRef.current = setInterval(() => {
-    //   setTimer((prev) => {
-    //     if (prev <= 1) {
-    //       clearInterval(timerRef.current);
-    //       return 0;
-    //     }
-    //     return prev - 1;
-    //   });
-    // }, 1000); 
-  
-    // Add the new bid to the bid history
-    // if (newBid.bidAmount) {
-    //   setBidHistory((prev) => [...prev, newBid]);
-    // }
   };
 
 

@@ -10,7 +10,7 @@ const mongoose =require("mongoose");
 const product_schema =new mongoose.Schema({   
     userID: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        ref: 'user',
         required: true
       },
     product_name :{
