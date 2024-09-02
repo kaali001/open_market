@@ -23,21 +23,23 @@ const ProductCard = styled(NavLink)`
   background-color: #ffffff;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.3s ease-in-out;
+   overflow: hidden;
   &:hover {
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
   }
-  width: 35rem;
-  max-width: 20rem;
+  // width: 35rem;
+  // max-width: 20rem;
   @media (min-width: 768px) {
     max-width: 100%;
-    margin-left: -2rem;
+    // margin-left: -2rem;
+    padding: 4rem:
   }
 `;
 
 const CardImage = styled.img`
   width: 20rem;
   height: 15rem;
-  margin-left: 2rem;
+  margin-left: 6rem;
   margin-top: 2rem;
 `;
 

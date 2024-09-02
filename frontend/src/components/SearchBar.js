@@ -28,11 +28,9 @@ const SearchBar = ({ onSearch }) => {
 };
 
 const SearchContainer = styled.div`
-  position: absolute;
-  top: 15.5rem;
-  right: 6rem;
   display: flex;
   align-items: center;
+  margin-bottom: 10px;
 
   label {
     input {
@@ -56,12 +54,11 @@ const SearchContainer = styled.div`
   }
 
   @media (max-width: 768px) {
-    top: 10px;
-    right: 10px;
-
+    flex-direction: column;
     label {
       input {
-        width: 150px;
+        width: 100%;
+        margin-bottom: 10px;
       }
     }
   }

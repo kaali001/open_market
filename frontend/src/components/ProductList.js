@@ -17,12 +17,12 @@ const ProductList = ({ products }) => {
 };
 
 const Wrapper = styled.section`
-  margin-left: 30rem;
+  margin-left: 1rem;
   margin-top: 5rem;
   .product-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 4rem;
+    gap: 2rem;
     justify-content: center;
   }
 `;

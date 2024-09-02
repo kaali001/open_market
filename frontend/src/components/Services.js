@@ -105,7 +105,7 @@ const Wrapper = styled.section`
     padding: 2rem;
     border-radius: 50%;
     background-color: #fff;
-    color:green;
+    color:rgb(98 84 243);
   }
 `;
 export default Services;
