@@ -40,6 +40,10 @@ const product_schema =new mongoose.Schema({
     origin:{
         type:String,
         required:true  
+    },
+    availability: {
+        type: Boolean,
+        default: true  
     }
 
 })

@@ -13,11 +13,31 @@ const SingleProduct = () => {
   const [timer, setTimer] = useState(0);
   const [isRobotButtonActive, setIsRobotButtonActive] = useState(false);
   const [bidHistory, setBidHistory] = useState([]); // State to store bid history
+  const [userBalance, setUserBalance] = useState(0);
+  const [isBiddingAllowed, setIsBiddingAllowed] = useState(true);
   const user_id = localStorage.getItem("user_id");
   const token = localStorage.getItem("token");
   const timerRef = useRef(null);
 
   const socket = useRef(null);
+
+
+  useEffect(() => {
+    const fetchUserBalance = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/users/account/${user_id}`, {
+          headers: {
+            'x-auth-token': token,
+          }
+        });
+        setUserBalance(response.data.balance);
+      } catch (error) {
+        console.error("Error fetching user balance:", error);
+      }
+    };
+
+    fetchUserBalance();
+  }, [user_id, token]);
 
   // Fetch product details from the backend using the ID
   useEffect(() => {
@@ -25,6 +45,7 @@ const SingleProduct = () => {
       try {
         const response = await axios.get(`http://localhost:5000/api/products/${id}`); 
         setProduct(response.data); 
+        setIsBiddingAllowed(response.data.availability);
       } catch (error) {
         console.error("Error fetching product:", error);
       }
@@ -102,6 +123,11 @@ const SingleProduct = () => {
       return;
     }
 
+    if (bidAmount > userBalance) {
+      alert("Insufficient balance to place the bid.");
+      return;
+    }
+
     const newBid = {
       productId: product._id,
       userId: user_id,
@@ -120,12 +146,15 @@ const SingleProduct = () => {
     return <div>Product not found</div>;
   }
 
-  const { product_name, product_image, description, price } = product;
+  const { product_name, product_image,availability, description, price } = product;
 
   return (
     <ProductContainer>
       <ProductInfo>
-        <ProductImage src={product_image} alt={product_name} />
+      <ImageWrapper>
+                    <ProductImage src={product_image} alt={product_name} />
+                    {!availability && <SoldLabel><img src="../images/sold-out-stamp.png" alt="sold-item"/></SoldLabel>}
+                </ImageWrapper>
         <ProductDetails>
           <StatusSection>
             <RobotButton isactive={isRobotButtonActive ? 'true' : undefined}></RobotButton>
@@ -154,8 +183,12 @@ const SingleProduct = () => {
             placeholder="Enter your bid"
             value={bidAmount}
             onChange={(e) => setBidAmount(e.target.value)}
+            disabled={!isBiddingAllowed} 
           />
-          <BidButton onClick={handleBid}>Place Bid</BidButton>
+          <BidButton
+            onClick={handleBid}
+            disabled={!isBiddingAllowed}
+            isDisabled={!isBiddingAllowed}>Place Bid</BidButton>
           <Timer>{timer > 0 ? `Time Left: ${Math.floor(timer / 60)}:${(timer % 60).toString().padStart(2, '0')}` : "Bidding Ended"}</Timer>
         </ProductDetails>
       </ProductInfo>
@@ -230,6 +263,27 @@ const ProductImage = styled.img`
   border-radius: 5px;
 `;
 
+const ImageWrapper = styled.div`
+    position: relative;
+    width: 300px;
+    max-width: 500px;
+`;
+
+const SoldLabel = styled.div`
+
+   position: absolute;
+   margin :0 0 0 80px;
+   bottom: 10px; 
+   padding: 8px 16px;
+   transform: translateX(40%); 
+   font-weight: bold;
+
+    img {
+    width: 150px;  
+    height: auto;
+  }
+`;
+
 const ProductDetails = styled.div`
   text-align: left;
 `;
@@ -273,11 +327,12 @@ const BidInput = styled.input`
 const BidButton = styled.button`
   padding: 10px 20px;
   font-size: 16px;
-  background-color: #007bff;
+  background-color: ${({ isDisabled }) => (isDisabled ? 'gray' : '#007bff')};
   color: white;
   border: none;
   border-radius: 5px;
-  cursor: pointer;
+  cursor: ${({ isDisabled }) => (isDisabled ? 'not-allowed' : 'pointer')};
+
 `;
 
 const Timer = styled.p`

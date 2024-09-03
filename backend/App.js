@@ -10,6 +10,8 @@ const userRoutes = require("./routes/users");
 const productsRoutes = require("./routes/products");
 const Product = require("./models/product");
 const Transaction = require("./models/transaction");
+const {User} = require("./models/user");
+
 
 dotenv.config({ path: './config.env' });
 require('./Db/conn');
@@ -57,9 +59,19 @@ io.on("connection", (socket) => {
     console.log("Bid received:", { productId, userId, bidAmount });
 
     const product = await Product.findById(productId);
+    const user = await User.findById(userId);
 
     if (!product) {
       return socket.emit("error", "Product not found");
+    }
+
+
+    if (!user) {
+      return socket.emit("error", "User not found");
+    }
+
+    if (bidAmount > user.balance) {
+      return socket.emit("error", "Insufficient balance to place the bid.");
     }
 
     const currentTime = new Date();
@@ -111,6 +123,11 @@ io.on("connection", (socket) => {
   });
 
   const processBiddingEnd = async (productId, sellerId) => {
+    
+    const user = await User.findById(activeBids[productId].highestBidder);
+    user.balance -= activeBids[productId].highestBid;
+    await user.save();
+
     const transaction = new Transaction({
       buyerID: activeBids[productId].highestBidder,
       sellerID: sellerId,
@@ -119,6 +136,13 @@ io.on("connection", (socket) => {
     });
 
     await transaction.save();
+
+    // Mark the product as sold
+    const product = await Product.findById(productId);
+    product.availability = false;
+    await product.save();
+
+
     io.to(productId).emit("biddingEnded", transaction);
 
     delete activeBids[productId];
