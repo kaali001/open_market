@@ -65,6 +65,9 @@ const Login = () => {
 						<button type="submit" className={"green_btn"}>
 							Sign In
 						</button>
+						<Link to="/forgot-password" className="forgot_password_link">
+                                Forgot Password?
+                        </Link>
 					</form>
 				</div>
 				<div className={"right"}>
@@ -149,6 +152,18 @@ const Wrapper = styled.section`
 	border-radius: 5px;
 	text-align: center;
 }
+
+  .forgot_password_link {
+        display: block;
+        margin-top: 10px;
+        color: #007bff;
+        text-decoration: none;
+        font-size: 14px;
+    }
+
+    .forgot_password_link:hover {
+        text-decoration: underline;
+    }
 
 .right {
 	flex: 1;

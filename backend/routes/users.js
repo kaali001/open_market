@@ -1,6 +1,6 @@
 
 const express = require('express');
-const { login,signup,getUserDetails, updateUserDetails, getUserBoughtItems, getUserBalance, addUserBalance } = require('../controllers/user');
+const { login, signup, forgotPassword, resetPassword, getUserDetails, updateUserDetails, getUserBoughtItems, getUserBalance, addUserBalance } = require('../controllers/user');
 const { createOrder, verifyPayment } = require('../controllers/payment');
 
 const auth = require('../middleware/auth'); 
@@ -8,6 +8,8 @@ const auth = require('../middleware/auth');
 const router = express.Router();
 
 router.post("/login", login);
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password/:token", resetPassword);
 router.post("/signup", signup);
 router.get('/account/:userId', auth, getUserDetails); 
 router.patch('/account/:userId', auth, updateUserDetails); 

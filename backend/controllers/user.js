@@ -2,10 +2,11 @@
 
 const { User, validate } = require("../models/user");
 const  BoughtItem  = require('../models/transaction'); 
+const Token = require("../models/token");
+const sendEmail = require("../utils/sendEmail");
 const Products= require("../models/product");
 const bcrypt = require("bcrypt");
-const Joi = require("joi");
-const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
 
 exports.login = async (req, res) => {
@@ -28,6 +29,80 @@ exports.login = async (req, res) => {
 	}
 
 };
+
+
+exports.forgotPassword = async (req, res) => {
+  try {
+      const { email } = req.body;
+      const user = await User.findOne({ email });
+      if (!user) return res.status(400).send("User with given email doesn't exist");
+
+      let token = await Token.findOne({ userId: user._id });
+ 
+      if (!token) {
+          token = await new Token({
+              userId: user._id,
+              token: crypto.randomBytes(32).toString("hex"),
+          }).save();
+      }
+
+      const url = `${process.env.FRONTEND_URL}/reset-password/${token.token}`;
+      
+      await sendEmail(
+        user.email,
+        "Password Reset",
+        `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+          <h2 style="color: #333;">Password Reset Request</h2>
+          <p>Dear ${user.Name},</p>
+          <p>We received a request to reset your password. Please click the button below to reset your password:</p>
+          <a href="${url}" style="display: inline-block; padding: 10px 20px; margin: 10px 0; font-size: 16px; color: #fff; background-color: #007BFF; border-radius: 5px; text-decoration: none;">Reset Password</a>
+          <p>If you did not request this, please ignore this email.</p>
+          <p>Thank you,</p>
+          <p>The U-mart Team</p>
+        </div>
+        `
+      );
+      
+     
+      res.send(`Password reset link sent to ${user.email}`);
+  } catch (error) {
+      console.error("Forgot password error:", error);
+      res.status(500).send("An error occurred");
+  }
+};
+
+
+exports.resetPassword = async (req, res) => {
+  try {
+      const { token } = req.params;
+      const { password } = req.body;
+ 
+      const passwordResetToken = await Token.findOne({ token });
+
+      if (!passwordResetToken) return res.status(400).send("Invalid or expired password reset token");
+
+      const user = await User.findById(passwordResetToken.userId);
+      if (!user) return res.status(400).send("User not found");
+
+
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+
+      user.password = hashedPassword;
+      await user.save();
+
+      await passwordResetToken.deleteOne();
+
+      res.send("Password reset successfully");
+  } catch (error) {
+    console.log(error);
+      res.status(500).send("An error occurred");
+  }
+};
+
+
+
 
 exports.signup = async (req, res) => {
 

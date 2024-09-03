@@ -10,6 +10,8 @@ import About from "./About";
 import SingleProduct from "./SingleProduct"; 
 import Contact from "./Contact";
 import Login from "./Login";
+import ForgotPassword from "./components/ForgotPassword";
+import ResetPassword from "./components/ResetPassword";
 import Signup from "./Signup";
 import ErrorPage from "./ErrorPage";
 import Voov from "./Voov";
@@ -75,6 +77,8 @@ function App() {
           <Route path="/aboutproduct/:id" element={<SingleProduct />} /> {/*// shows the product details page. */}
           <Route path="/contact" element={<Contact />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="*" element={<ErrorPage />} />
         </Routes>
