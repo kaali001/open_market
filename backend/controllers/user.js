@@ -3,10 +3,17 @@
 const { User, validate } = require("../models/user");
 const  BoughtItem  = require('../models/transaction'); 
 const Token = require("../models/token");
+const TempUser = require("../models/tempUser");
 const sendEmail = require("../utils/sendEmail");
 const Products= require("../models/product");
 const bcrypt = require("bcrypt");
+const jwt = require('jsonwebtoken');
+const dotenv = require("dotenv");
 const crypto = require('crypto');
+
+
+dotenv.config({ path: './config.env' });
+
 
 
 exports.login = async (req, res) => {
@@ -102,45 +109,64 @@ exports.resetPassword = async (req, res) => {
 };
 
 
-
-
 exports.signup = async (req, res) => {
-
-    try {
-        const { error } = validate(req.body);
-        if (error) {
+  try {
+      const { error } = validate(req.body);
+      if (error) {
           return res.status(400).send({ message: error.details[0].message });
-        }
-    
-        const existingUser = await User.findOne({ email: req.body.email });
-        if (existingUser) {
+      }
+
+      const existingUser = await User.findOne({ email: req.body.email });
+      if (existingUser) {
           return res.status(409).send({ message: "User with given email already exists!" });
-        }
-    
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(req.body.password, salt);
-    
-        const newUser = new User({
+      }
+
+      const existingTempUser = await TempUser.findOne({ email: req.body.email });
+      if (existingTempUser) {
+          await TempUser.deleteOne({ email: req.body.email });
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(req.body.password, salt);
+
+      const otp = Math.floor(100000 + Math.random() * 900000).toString(); // generate a 6-character OTP
+      const otpExpires = Date.now() + 5 * 60 * 1000; // OTP expires in 5 minutes
+
+      const tempUser = new TempUser({
           Name: req.body.Name,
           email: req.body.email,
           phone: req.body.phone,
           address: req.body.address,
           pincode: req.body.pincode,
-          password: hashedPassword
-        });
-    
-        await newUser.save();
-    
-        res.status(201).send({ message: "User created successfully" });
-      } catch (error) {
-        console.error(error);
-        res.status(500).send({ message: "Internal Server Error" });
-      }
+          password: hashedPassword,
+          otp,
+          otpExpires
+      });
 
+      await tempUser.save();
+      
+     
+
+       // Create JWT with email and send it to the user
+       const user_id = jwt.sign({ email: req.body.email }, process.env.JWTPRIVATEKEY, { expiresIn: '35m' });
+
+      console.log(user_id);
+
+      const emailContent = `
+          <h1>Email Verification</h1>
+          <p>Your OTP for signup verification is: <strong>${otp}</strong></p>
+          <p>This OTP is valid for 5 minutes.</p>
+      `;
+      await sendEmail(req.body.email, "Email Verification", emailContent);
+
+      res.status(200).send({ message: "OTP sent to your email",user_id });
+
+  } catch (error) {
+      console.error(error);
+      res.status(500).send({ message: "Internal Server Error" });
+  }
 };
 
-
-// Fetch user details
 exports.getUserDetails = async (req, res) => {
   try {
     const user = await User.findById(req.params.userId);

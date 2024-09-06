@@ -26,9 +26,14 @@ const Signup = () => {
 		e.preventDefault();
 		try {
 			const url = "http://localhost:5000/api/users/signup";
-			const { data: res } = await axios.post(url, data);
-			navigate("/");
-			console.log(res.message);
+			const response = await axios.post(url, data);
+
+			const { user_id } = response.data;
+      
+			// Store the token in sessionStorage
+			sessionStorage.setItem('signupToken', user_id);
+			navigate("/verify-otp");
+			console.log(response.message);
 		} catch (error) {
 			if (
 				error.response &&
@@ -43,6 +48,7 @@ const Signup = () => {
 	return (
 
     <Wrapper>
+		{error && <div className={"error_msg"}>{error}</div>}
 		<div className={"signup_container"}>
 			<div className={"signup_form_container"}>
 				<div className={"left"}>
@@ -112,7 +118,7 @@ const Signup = () => {
 							required
 							className={"input"}
 						/>
-						{error && <div className={"error_msg"}>{error}</div>}
+						
 						<button type="submit" className={"green_btn"}>
 							Sign Up
 						</button>
@@ -198,8 +204,9 @@ const Wrapper = styled.section`
 
 .error_msg {
 	width: 370px;
-	padding: 15px;
-	margin: 5px 0;
+	padding: 10px;
+	margin-top: 5px;
+	margin-left:40%;
 	font-size: 14px;
 	background-color: #f34646;
 	color: white;
