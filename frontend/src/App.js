@@ -22,7 +22,8 @@ import { GlobalStyle } from "./GlobalStyle";
 import { ThemeProvider } from "styled-components";
 import Header from "./components/Header";
 import UserProfilePage from "./UserProfile";
-
+import Admin from "./AdminPage";
+import ProtectedRoute from './components/Admin/ProtectedRoute';
 
 function App() {
 
@@ -74,6 +75,8 @@ function App() {
           <Route path="/products" element={<Voov />} />
           {user&&<Route path="/product-form" element={<ProductForm/>} />}
           {user&&<Route path="/user-profile" element={<UserProfilePage/>} />}
+        
+          <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
           
           <Route path="/aboutproduct/:id" element={<SingleProduct />} /> {/*// shows the product details page. */}
           <Route path="/contact" element={<Contact />} />

@@ -42,7 +42,19 @@ const user_schema =new mongoose.Schema({
     balance: { 
          type: Number,
         default: 0 
-    }
+    },
+    isActive: { 
+        type: Boolean, 
+        default: true 
+    },
+    isAdmin: {
+        type: Boolean,
+        default: false,
+      },
+      createdAt: {
+        type: Date,
+        default: Date.now,
+    },
 
 })
 

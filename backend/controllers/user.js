@@ -30,10 +30,22 @@ exports.login = async (req, res) => {
       // Generate JWT
       const token = user.generateAuthToken();
 
-		res.status(200).send({ user:token ,user_id:user._id, message: "logged in successfully" });
-	} catch (error) {
-		res.status(500).send({ message: "Internal Server Error" });
-	}
+
+    // If the user is an admin, set the token as an httpOnly cookie
+    if (user.isAdmin) {
+      res.cookie('token', token, {
+        httpOnly: true,
+        // secure: process.env.NODE_ENV === 'production', // use secure cookies in production
+        sameSite: 'Strict',
+        maxAge: 60 * 60 * 1000, // 1 hour
+      });
+
+    }
+
+    res.status(200).send({ token, user_id: user._id, isAdmin: user.isAdmin, message: "logged in successfully" });
+  } catch (error) {
+    res.status(500).send({ message: "Internal Server Error" });
+  }
 
 };
 
@@ -169,7 +181,7 @@ exports.signup = async (req, res) => {
 
 exports.getUserDetails = async (req, res) => {
   try {
-    const user = await User.findById(req.params.userId);
+    const user = await User.findById(req.params.userId).select('Name email address phone pincode state');
     if (!user) return res.status(404).json({ message: 'User not found' });
     res.status(200).json(user);
   } catch (error) {

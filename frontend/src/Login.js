@@ -18,11 +18,14 @@ const Login = () => {
 		e.preventDefault();
 		try {
 			const url = "http://localhost:5000/api/users/login";
-			const { data: res } = await axios.post(url, data);
+			const { data: res } = await axios.post(url, data,{ withCredentials: true });
 
-			localStorage.setItem("token", res.user); // user comes from backend after successful login
-			localStorage.setItem("user_id", res.user_id); 
-			window.localStorage.setItem("isLoggedIn",true);
+			if (!res.isAdmin) {
+				localStorage.setItem("token", res.token);
+			}
+	
+			localStorage.setItem("user_id", res.user_id);
+			window.localStorage.setItem("isLoggedIn", true);
 			window.location = "/";
 		} catch (error) {
 			if (
