@@ -3,11 +3,13 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
 import { BiSearch } from "react-icons/bi";
+import UserDetailsModal from './UserDetails';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState('');
   const [selectedUsers, setSelectedUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const token = localStorage.getItem('token');
@@ -40,10 +42,12 @@ const UserManagement = () => {
   };
 
   
-  const handleSelectUser = (id) => {
-    setSelectedUsers((prev) =>
-      prev.includes(id) ? prev.filter((userId) => userId !== id) : [...prev, id]
-    );
+  const handleSelectUser = (user) => {
+    setSelectedUser(user);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedUser(null);
   };
 
   return (
@@ -83,14 +87,16 @@ const UserManagement = () => {
               <td>
                 <input
                   type="checkbox"
-                  onChange={() => handleSelectUser(user._id)}
                   checked={selectedUsers.includes(user._id)}
+                  onChange={(e) => setSelectedUsers(prev => e.target.checked ? [...prev, user._id] : prev.filter(id => id !== user._id))}
+              
                 />
               </td>
               <td>{user._id}</td>
               <td>{user.Name}</td>
               <td>{user.email}</td>
               <td>
+              <button onClick={() => handleSelectUser(user)}>View</button>
                 <button>Edit</button>
                 <button onClick={() => handleDeleteUsers([user._id])}>Delete</button>
               </td>
@@ -99,16 +105,22 @@ const UserManagement = () => {
         </tbody>
       </UserTable>
       <Pagination>
-        <button onClick={() => setPage(page - 1)} disabled={page === 1}>
-          Previous
-        </button>
-        <span>
-          Page {page} of {totalPages}
-        </span>
-        <button onClick={() => setPage(page + 1)} disabled={page === totalPages}>
-          Next
-        </button>
+
+        {Array.from({ length: totalPages }, (_, index) => (
+          <PageButton
+            key={index}
+            onClick={() => setPage(index + 1)}
+            $active={page === index + 1}
+          >
+            {index + 1}
+          </PageButton>
+        ))}
       </Pagination>
+
+
+      {selectedUser && (
+        <UserDetailsModal user={selectedUser} onClose={handleCloseModal} />
+      )}
     </UserContainer>
   );
 };
@@ -181,20 +193,22 @@ const UserTable = styled.table`
 
 const Pagination = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   margin-top: 20px;
+`;
 
-  button {
-    padding: 5px 10px;
-    background-color: #3498db;
+const PageButton = styled.button`
+  padding: 10px;
+  border: none;
+  background-color: ${props => (props.$active ? '#3498db' : '#f4f4f4')};
+  color: ${props => (props.$active ? 'white' : '#3498db')};
+  margin: 0 5px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+  &:hover {
+    background-color: #2980b9;
     color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-
-  span {
-    align-self: center;
   }
 `;
 

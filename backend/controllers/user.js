@@ -220,6 +220,26 @@ exports.getUserBoughtItems = async (req, res) => {
   }
 };
 
+//Fetching user listed products
+exports.getUserListedItems = async(req,res) => {
+
+  try {
+
+    const listedProducts = await Products.find({userID:req.params.userId});
+    
+    if(listedProducts.length>0){
+       res.status(200).json(listedProducts);
+    }
+    else{
+      res.status(200).json({message:'No listed products for sell.'});
+    }
+  
+  }
+    catch(error){
+      res.status(500).json({ message: 'Server error', error: error.message }); 
+    }  
+};
+
 
 // Fetch user balance
 exports.getUserBalance = async (req, res) => {

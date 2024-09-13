@@ -51,19 +51,19 @@ const Admin = () => {
   return (
     <AdminContainer>
       <Sidebar>
-        <SidebarItem onClick={() => setActiveTab('dashboard')} active={activeTab === 'dashboard'}>
+        <SidebarItem onClick={() => setActiveTab('dashboard')} $active={activeTab === 'dashboard'}>
           <FaTachometerAlt />
           <span>Dashboard</span>
         </SidebarItem>
-        <SidebarItem onClick={() => setActiveTab('users')} active={activeTab === 'users'}>
+        <SidebarItem onClick={() => setActiveTab('users')} $active={activeTab === 'users'}>
           <FaUsers />
           <span>Users</span>
         </SidebarItem>
-        <SidebarItem onClick={() => setActiveTab('transactions')} active={activeTab === 'transactions'}>
+        <SidebarItem onClick={() => setActiveTab('transactions')} $active={activeTab === 'transactions'}>
           <FaMoneyCheckAlt />
           <span>Transactions</span>
         </SidebarItem>
-        <SidebarItem onClick={() => setActiveTab('settings')} active={activeTab === 'settings'}>
+        <SidebarItem onClick={() => setActiveTab('settings')} $active={activeTab === 'settings'}>
           <FaCog />
           <span>Settings</span>
         </SidebarItem>

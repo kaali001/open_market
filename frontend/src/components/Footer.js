@@ -17,8 +17,8 @@ const Footer = () => {
           <div className="container grid grid-three-column">
 
             <div className="footer-about">
-               <div class="col-lg-3 col-md-6">
-                    <h3 class="mb-4">Get In Touch</h3>
+               <div className="col-lg-3 col-md-6">
+                    <h3 className="mb-4">Get In Touch</h3>
                     <p className="footer-about-p"><FaRoute className="icon"/>123 Street, Raibareli,India</p>
                     <p className="footer-about-p"><FaPhoneAlt className="icon"/>    +9182365236</p>
                     <p className="footer-about-p"><BsEnvelope className="icon"/>    info@openmarket.com</p>
@@ -26,8 +26,8 @@ const Footer = () => {
             </div>
 
             <div className="footer-subscribe">
-               <div class="col-lg-3 col-md-6">
-                    <h3 class="mb-4">Quick Links</h3>
+               <div className="col-lg-3 col-md-6">
+                    <h3 className="mb-4">Quick Links</h3>
                     <NavLink to="/about"> <p className="footer-about-p">About us</p></NavLink>
                     <NavLink to="/contact"> <p className="footer-about-p">Contact us</p></NavLink>
                     <NavLink to="/services"> <p className="footer-about-p">Our Services</p></NavLink>

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom'; 
 import styled from 'styled-components';
 import { Button } from '../styles/Button';
-
+import useAuth from '../hooks/useAuth';
 
 const Nav = styled.nav`
   .navbar-lists {
@@ -200,14 +200,36 @@ const Nav = styled.nav`
 `;
 
 const Navbar = () => {
-  const [menuIcon, setMenuIcon] = useState(false); // Added initial state for menuIcon
-  const navigate = useNavigate(); // Added navigate for redirection
+  const { authenticated, isAdmin } = useAuth(); //checking if user is admin
+  const [menuIcon, setMenuIcon] = useState(false); 
+  const navigate = useNavigate(); 
   const isLoggedin = window.localStorage.getItem("isLoggedIn");
 
   const logoutUser = () => {
     window.localStorage.clear();
-    navigate("/"); // Redirect to home after logout
+    navigate("/"); 
   };
+
+  const adminLogoutUser = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/admin/logout', {
+        method: 'POST',
+        credentials: 'include', 
+      });
+
+      if (response.ok) {
+      
+        window.localStorage.clear();
+        navigate("/"); 
+      } else {
+        console.error('Failed to log out');
+      }
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
+
+
 
   return (
     <Nav>
@@ -236,9 +258,18 @@ const Navbar = () => {
             <li className='profile-pic-container'>
               <img src='/images/avatar.svg' alt='Profile' />
               <div className='profile-popup'>
-                <div className='popup-item' onClick={() => navigate('/user-profile')}>Account</div>
-                <div className='popup-item' onClick={() => navigate('/user-profile#be-seller')}>Be Seller</div>
-                <div className='popup-item' onClick={logoutUser}>Logout</div>
+                <div className='popup-item' onClick={() => {
+                    authenticated && isAdmin ? (navigate('/admin')) : (
+                    navigate('/user-profile'))}
+                  }>Account</div>
+                {/* <div className='popup-item' onClick={() => navigate('/user-profile#be-seller')}>Be Seller</div> */}
+                <div className='popup-item' onClick={() => {
+                  if (authenticated && isAdmin) {
+                    adminLogoutUser();
+                  } else {
+                    logoutUser();
+                  }
+                }}>Logout</div>
               </div>
             </li>
           ) : (

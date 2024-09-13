@@ -1,6 +1,6 @@
 
 const express = require('express');
-const { login, signup, forgotPassword, resetPassword, getUserDetails, updateUserDetails, getUserBoughtItems, getUserBalance, addUserBalance } = require('../controllers/user');
+const { login, signup, forgotPassword, resetPassword, getUserDetails, updateUserDetails, getUserBoughtItems, getUserBalance,getUserListedItems, addUserBalance } = require('../controllers/user');
 const { createOrder, verifyPayment } = require('../controllers/payment');
 const {verifyOtp, resendOtp} = require('../controllers/verifyOtp');
 const auth = require('../middleware/auth'); 
@@ -13,9 +13,11 @@ router.post("/reset-password/:token", resetPassword);
 router.post("/signup", signup);
 router.post("/verifyOtp", verifyOtp);
 router.post("/resendOtp", resendOtp);
+
 router.get('/account/:userId', auth, getUserDetails); 
 router.patch('/account/:userId', auth, updateUserDetails); 
 router.get('/bought-items/:userId', auth, getUserBoughtItems); 
+router.get('/listed-items/:userId/products',auth,getUserListedItems);
 
 router.get('/balance/:userId', auth, getUserBalance); 
 router.post('/balance/:userId', auth, addUserBalance); 

@@ -544,7 +544,7 @@ const handlePayment = async () => {
     <ProfilePageWrapper>
       <div className="sidebar">
         <img src='/images/avatar.svg' alt="Profile Pic" className="profile-pic" />
-        <div className="username">John Doe</div>
+        <div className="username">{userDetails.Name}</div>
         
         <div className={`menu-item ${activeMenu === 'Account' ? 'active' : ''}`} onClick={() => setActiveMenu('Account')}>Account</div>
         <div className={`menu-item ${activeMenu === 'Bought items' ? 'active' : ''}`} onClick={() => setActiveMenu('Bought items')}>Bought items</div>
