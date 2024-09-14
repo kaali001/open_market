@@ -10,7 +10,7 @@ const HeroSection = ({ myData }) => {
         <div className="grid grid-two-column">
           <div className="hero-section-data">
            
-            <h1>{name}</h1>
+            <h2>{name}</h2>
             <p>
               Open Market is a leading online bidding platform where buyers and sellers connect
               in real-time auctions. Whether you're looking to find a great deal or sell
@@ -39,7 +39,7 @@ const HeroSection = ({ myData }) => {
 
 const Wrapper = styled.section`
   padding: 12rem 0;
-
+  background-image: url("./images/bckg-img.jpg");
   img {
     min-width: 10rem;
     height: 10rem;

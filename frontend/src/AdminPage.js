@@ -5,8 +5,8 @@ import styled from 'styled-components';
 import Dashboard from './components/Admin/Dashboard';
 import UserManagement from './components/Admin/UserManagement';
 import TransactionManagement from './components/Admin/TransactionManagement';
-import { FaTachometerAlt, FaUsers, FaMoneyCheckAlt, FaCog, FaSignOutAlt } from 'react-icons/fa'; // Importing icons
-
+import { FaTachometerAlt, FaUsers, FaMoneyCheckAlt, FaBox, FaCog, FaSignOutAlt } from 'react-icons/fa'; // Importing icons
+import DailyOrders from './components/Admin/DailyOrder';
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -43,6 +43,8 @@ const Admin = () => {
         return <TransactionManagement />;
       case 'settings':
         return <div>Settings</div>;
+      case 'orders':
+        return <DailyOrders/>;
       default:
         return <Dashboard />;
     }
@@ -63,6 +65,10 @@ const Admin = () => {
           <FaMoneyCheckAlt />
           <span>Transactions</span>
         </SidebarItem>
+        <SidebarItem onClick={() => setActiveTab('orders')} $active={activeTab === 'orders'}>
+          <FaBox />
+          <span>Orders</span>
+        </SidebarItem>
         <SidebarItem onClick={() => setActiveTab('settings')} $active={activeTab === 'settings'}>
           <FaCog />
           <span>Settings</span>
@@ -79,7 +85,7 @@ const Admin = () => {
 
 const AdminContainer = styled.div`
   display: flex;
-  height: 90vh;
+  height: 100vh;
   background-color: #ecf0f1;
 `;
 

@@ -8,7 +8,7 @@ import Footer from './components/Footer';
 const Home = () => {
 
     const data ={
-        name:"Welcome to The Open Market",
+        name:"Bid Smart, Sell Fast: Your Auction Destination on Open Market",
     };
   return (
         <>

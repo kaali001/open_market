@@ -162,7 +162,7 @@ exports.signup = async (req, res) => {
        // Create JWT with email and send it to the user
        const user_id = jwt.sign({ email: req.body.email }, process.env.JWTPRIVATEKEY, { expiresIn: '35m' });
 
-      console.log(user_id);
+
 
       const emailContent = `
           <h1>Email Verification</h1>

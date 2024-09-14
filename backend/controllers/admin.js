@@ -145,4 +145,29 @@ const getDashboardStats = async (req, res) => {
 };
 
 
-module.exports = { checkAdmin, logout, allTransactions, getDashboardStats, getUsers, updateUser, deleteUser };
+//to fetching the orders on daily basis
+const DailyOrders = async (req, res) => {
+  const { date } = req.query;
+
+  // the date is in UTC format (YYYY-MM-DD)
+  const startOfDay = new Date(date);
+  startOfDay.setUTCHours(0, 0, 0, 0);
+
+  const endOfDay = new Date(date);
+  endOfDay.setUTCHours(23, 59, 59, 999);
+
+  try {
+    const orders = await Transaction.find({
+      transactionDate: {
+        $gte: startOfDay,
+        $lte: endOfDay
+      }
+    });
+    res.status(200).json({ success: true, orders });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error fetching orders', error });
+  }
+};
+
+
+module.exports = { checkAdmin, logout, allTransactions, getDashboardStats, getUsers, updateUser, deleteUser, DailyOrders };
