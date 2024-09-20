@@ -41,7 +41,7 @@ function App() {
       helper: "#8490ff",
       bg: "#131921",
       nav:"#131921",
-      services:"#37475A",
+      services:'#4789c9',
       trusted:"#232f3e",
       footer_bg: "#131A22",
       

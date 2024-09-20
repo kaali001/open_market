@@ -12,7 +12,16 @@ const productsRoutes = require("./routes/products");
 const Product = require("./models/product");
 const Transaction = require("./models/transaction");
 const {User} = require("./models/user");
+const fs = require('fs');
+const path = require('path');
 
+
+// Ensure the uploads directory exists
+const uploadsDir = path.join(__dirname, 'uploads');
+
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir);
+}
 
 dotenv.config({ path: './config.env' });
 require('./Db/conn');
@@ -35,6 +44,9 @@ app.use(cors({
   credentials: true, 
 }));
 app.use(cookieParser());
+
+// Serve static files from the "uploads" folder
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Use routes
 app.use("/api/admin", adminRoutes);

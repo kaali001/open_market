@@ -10,7 +10,7 @@ const TransactionItem = ({ transaction }) => {
       <TransactionDetails>
         <p><strong>Name:</strong> {transaction.productID.product_name}</p>
         <p><strong>Amount Paid:</strong> ${transaction.amount}</p>
-        <p><strong>Date:</strong> {new Date(transaction.date).toLocaleDateString()}</p>
+        <p><strong>Date:</strong> {new Date(transaction.transactionDate).toLocaleDateString()}</p>
       </TransactionDetails>
     </TransactionContainer>
   );

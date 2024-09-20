@@ -23,12 +23,14 @@ const SingleProduct = () => {
 
 
   useEffect(() => {
+    if(user_id){
     const fetchUserBalance = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/users/account/${user_id}`, {
+        const response = await axios.get(`http://localhost:5000/api/users/balance/${user_id}`, {
           headers: {
             'x-auth-token': token,
-          }
+          },
+           withCredentials: true 
         });
         setUserBalance(response.data.balance);
       } catch (error) {
@@ -36,7 +38,9 @@ const SingleProduct = () => {
       }
     };
 
+
     fetchUserBalance();
+  }
   }, [user_id, token]);
 
   // Fetch product details from the backend using the ID
@@ -162,7 +166,7 @@ const SingleProduct = () => {
           </StatusSection>
 
           <ProductName>{product_name}</ProductName>
-          <ProductPrice>Starting Price: ${price}</ProductPrice>
+          <ProductPrice>Current Price: ${price}</ProductPrice>
           <HighestBid>Highest Bid: ${highestBid}</HighestBid>
 
           {/* Bid History Section */}
@@ -188,7 +192,7 @@ const SingleProduct = () => {
           <BidButton
             onClick={handleBid}
             disabled={!isBiddingAllowed}
-            isDisabled={!isBiddingAllowed}>Place Bid</BidButton>
+           >Place Bid</BidButton>
           <Timer>{timer > 0 ? `Time Left: ${Math.floor(timer / 60)}:${(timer % 60).toString().padStart(2, '0')}` : "Bidding Ended"}</Timer>
         </ProductDetails>
       </ProductInfo>
@@ -324,16 +328,27 @@ const BidInput = styled.input`
   box-sizing: border-box;
 `;
 
+// const BidButton = styled.button`
+//   padding: 10px 20px;
+//   font-size: 16px;
+//   background-color: ${({ isdisabled }) => (isdisabled ? 'gray' : '#007bff')};
+//   color: white;
+//   border: none;
+//   border-radius: 5px;
+//   cursor: ${({ isdisabled }) => (isdisabled ? 'not-allowed' : 'pointer')};
+
+// `;
+
 const BidButton = styled.button`
   padding: 10px 20px;
   font-size: 16px;
-  background-color: ${({ isDisabled }) => (isDisabled ? 'gray' : '#007bff')};
+  background-color: ${({ disabled }) => (disabled ? 'gray' : '#007bff')};
   color: white;
   border: none;
   border-radius: 5px;
-  cursor: ${({ isDisabled }) => (isDisabled ? 'not-allowed' : 'pointer')};
-
+  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
 `;
+
 
 const Timer = styled.p`
   font-size: 16px;

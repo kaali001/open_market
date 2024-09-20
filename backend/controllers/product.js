@@ -12,7 +12,10 @@ exports.product_by_id = async (req, res) => {
         if (!product) {
           return res.status(404).json({ error: 'Product not found' });
         }
-    
+
+        // Modify image URL to include server path
+        product.product_image = `${req.protocol}://${req.get('host')}/${product.product_image}`;
+
         res.status(200).json(product);
       } catch (error) {
         console.error('Error fetching product:', error);
@@ -27,7 +30,14 @@ exports.all_products = async (req, res) => {
 
     try {
         const products = await Products.find({});
-        res.status(200).json(products);
+
+         // Modify image URL for each product
+         const updatedProducts = products.map(product => {
+          product.product_image = `${req.protocol}://${req.get('host')}/${product.product_image}`;
+          return product;
+      });
+       
+      res.status(200).json(updatedProducts);
       } catch (error) {
         console.error('Error fetching products:', error);
         res.status(500).json({ error: 'Internal Server Error' });
@@ -35,27 +45,26 @@ exports.all_products = async (req, res) => {
 };
 
 // POST endpoint to add product details
+
 exports.add_products = async (req, res) => {
+  try {
+    const { product_name, price, description, origin } = req.body; // extract text fields
+    const userID = req.body.id; // user information stored in req.user after authentication
+    const product_image = req.file.path;
 
-    try {
-        const {product_name,product_image,price, description,origin} = req.body.productData;
-        const userID = req.body.id; // user information stored in req.user after authentication
-        const product = new Products({
-          userID, 
-          product_name,
-          product_image,
-          description,
-          price,
-          origin
-        });
-    
-        await product.save();
-    
-        res.status(201).json(product); 
-      } catch (error) {
-        console.error('Error adding product:', error);
-        res.status(500).json({ error: 'Internal Server Error' }); 
-      }
+    const product = new Products({
+      userID,
+      product_name,
+      product_image, 
+      price,
+      description,
+      origin,
+    });
 
+    await product.save();
+    res.status(201).json(product);
+  } catch (error) {
+    console.error('Error adding product:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 };
-

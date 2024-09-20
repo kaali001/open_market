@@ -208,36 +208,44 @@ exports.getUserBoughtItems = async (req, res) => {
   try {
     // Find transactions where the user is the buyer and then populate product details from Product model.
     const transaction = await BoughtItem.find({ buyerID: req.params.userId })
-      .populate('productID', 'product_name price product_image'); 
+      .populate('productID', 'product_name price product_image');
 
     if (transaction.length > 0) {
-      res.status(200).json(transaction);
+      const updatedTransaction = transaction.map(item => ({
+        ...item.toObject(),
+        productID: {
+          ...item.productID.toObject(),
+          product_image: `${req.protocol}://${req.get('host')}/${item.productID.product_image}`
+        }
+      }));
+      res.status(200).json(updatedTransaction);
     } else {
       res.status(200).json({ message: 'No bought items found' });
     }
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message }); 
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
-//Fetching user listed products
-exports.getUserListedItems = async(req,res) => {
 
+
+// Fetch user listed products
+exports.getUserListedItems = async (req, res) => {
   try {
+    const listedProducts = await Products.find({ userID: req.params.userId });
 
-    const listedProducts = await Products.find({userID:req.params.userId});
-    
-    if(listedProducts.length>0){
-       res.status(200).json(listedProducts);
+    if (listedProducts.length > 0) {
+      const updatedListedProducts = listedProducts.map(product => ({
+        ...product.toObject(),
+        product_image: `${req.protocol}://${req.get('host')}/${product.product_image}`
+      }));
+      res.status(200).json(updatedListedProducts);
+    } else {
+      res.status(200).json({ message: 'No listed products for sell.' });
     }
-    else{
-      res.status(200).json({message:'No listed products for sell.'});
-    }
-  
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
-    catch(error){
-      res.status(500).json({ message: 'Server error', error: error.message }); 
-    }  
 };
 
 

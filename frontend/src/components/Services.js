@@ -95,14 +95,14 @@ const Wrapper = styled.section`
   h3 {
     margin-top: 1.4rem;
     font-size: 2rem;
-    color:#DDD;
+    color:white;
   }
 
   .icon {
     /* font-size: rem; */
     width: 8rem;
     height: 8rem;
-    padding: 2rem;
+    padding: 2rem 2rem 2rem 2rem;
     border-radius: 50%;
     background-color: #fff;
     color:rgb(98 84 243);

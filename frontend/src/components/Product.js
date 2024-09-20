@@ -3,15 +3,15 @@ import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
 const Product = ({ product }) => {
-  const { _id, product_name, product_image, description, price } = product;
+  const { _id, product_name, product_image, price } = product;
 
   return (
     <ProductCard to={`/aboutproduct/${_id}`}>
       <CardImage src={product_image} alt={product_name} />
       <CardBody>
         <ProductName>{product_name}</ProductName>
-        <ProductDescription>{description}</ProductDescription>
-        <Price>${price}</Price>
+        {/* <ProductDescription>{description}</ProductDescription> */}
+        <Price>Asked Price: ${price}</Price>
       </CardBody>
     </ProductCard>
   );
@@ -53,10 +53,10 @@ const ProductName = styled.h2`
   margin: 10px 0;
 `;
 
-const ProductDescription = styled.p`
-  font-size: 14px;
-  color: #888;
-`;
+// const ProductDescription = styled.p`
+//   font-size: 14px;
+//   color: #888;
+// `;
 
 const Price = styled.p`
   font-size: 16px;
