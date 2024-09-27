@@ -248,6 +248,42 @@ exports.getUserListedItems = async (req, res) => {
   }
 };
 
+// Fetch products sold by the user
+exports.getUserSoldItems = async (req, res) => {
+  try {
+ 
+    const soldItems = await BoughtItem.find({ sellerID: req.params.userId }).populate('productID', 'product_name price product_image');
+    if(soldItems.length > 0){
+      const updatedSoldProducts = soldItems.map(item => ({
+        ...item.toObject(),
+        productID: {
+          ...item.productID.toObject(),
+          product_image: `${req.protocol}://${req.get('host')}/${item.productID.product_image}`
+        }
+      }));
+      res.status(200).json(updatedSoldProducts);
+    } else {
+      res.status(200).json({message: 'No sold item found.'});
+    }
+   
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching sold items' });
+  }
+};
+
+// Fetch buyer details by buyerID
+exports.getBuyerDetails = async (req, res) => {
+  try {
+    const buyer = await User.findById(req.params.buyerId).select('Name email phone pincode address');
+    if (!buyer) {
+      return res.status(404).json({ message: 'Buyer not found' });
+    }
+    res.status(200).json(buyer);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching buyer details' });
+  }
+};
+
 
 // Fetch user balance
 exports.getUserBalance = async (req, res) => {

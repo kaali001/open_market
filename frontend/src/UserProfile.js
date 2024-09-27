@@ -4,6 +4,9 @@ import styled from 'styled-components';
 import {useNavigate } from 'react-router-dom'; 
 import { FaPen } from 'react-icons/fa';
 import ProductForm from './ProductForm';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+
 
 // Load Razorpay script dynamically
 const loadScript = (src) => {
@@ -249,6 +252,120 @@ const ProfilePageWrapper = styled.div`
       padding-left: 0;
     }
   }
+
+    .tabs {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    border-bottom: 1px solid var(--hairline-color, #d3d3d3);
+
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 10px;
+      margin:0 5px;
+      cursor: pointer;
+      border-radius: 5px;
+      font-size: 1.3rem;
+      font-weight: 500;
+      letter-spacing: 0.0178571em;
+      line-height: 1.25rem;
+
+      &:hover {
+        background-color: ${({ theme }) => theme.colors.primaryLight};
+      }
+
+      &.active {
+        color: #1c3ee9;
+        border-bottom: 3px solid var(--hairline-color, #1c3ee9);
+      }
+    }
+  }
+
+  .product-card {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 8px;
+    width:500px;
+    img {
+      width: 100px;
+      height: 100px;
+      margin-right: 15px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    div {
+      flex: 1;
+      margin-left:15px;
+    }
+
+    p {
+      margin: 5px 0;
+    }
+  }
+
+.sold-items {
+  .buyer-details-card {
+    position: fixed;
+    top: 30%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 20px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    z-index: 1000;
+    width: 80%;
+    max-width: 500px; 
+    box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .buyer-details-card p {
+    margin: 5px 0;
+  }
+
+  button {
+    margin-top: 10px;
+    padding: 6px 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background-color: #0056b3;
+  }
+
+  #close-btn {
+    position: absolute;
+    top: -8px;
+    right: 2px;
+    background: red;
+    color: white;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+
+}
+
+
+
+  @media (max-width: 768px) {
+    .tabs {
+      flex-direction: column;
+      .tab {
+        margin-bottom: 10px;
+      }
+    }
+  }
 `;
 
 
@@ -259,11 +376,14 @@ const UserProfilePage = () => {
   const token = localStorage.getItem('token');
 
   const [activeMenu, setActiveMenu] = useState('Account');
+  const [activeTab, setActiveTab] = useState('Add Product');
   const [userDetails, setUserDetails] = useState({});
   const [boughtItems, setBoughtItems] = useState([]);
   const [balance, setBalance] = useState(0);
   const [amountToAdd, setAmountToAdd] = useState(500);
-
+  const [listedProducts, setListedProducts] = useState([]);
+  const [soldItems, setSoldItems] = useState([]); 
+  const [buyerDetails, setBuyerDetails] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const navigate = useNavigate();
   const logoutUser = () => {
@@ -412,6 +532,155 @@ const handlePayment = async () => {
   };
 
 
+  // Fetching listed products
+  const fetchListedProducts = useCallback(async () => {
+    const response = await axios.get(`http://localhost:5000/api/users/listed-items/${userId}/products`, {
+      headers: { 'x-auth-token': token }
+    });
+    setListedProducts(response.data);
+  }, [token, userId]);
+
+
+  // Fetching sold items
+  const fetchSoldItems = useCallback(async () => {
+    const response = await axios.get(`http://localhost:5000/api/users/sold-items/${userId}/products`, {
+      headers: { 'x-auth-token': token }
+    });
+    setSoldItems(response.data);
+  }, [token, userId]);
+
+
+  //fetching buyer details of a listed product
+  const fetchBuyerDetails = async (buyerID, productID, amount) => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/users/buyer-details/${buyerID}`,{
+        headers:{'x-auth-token': token}
+      });
+      setBuyerDetails({
+        buyer: response.data,
+        product: productID, 
+        item: amount,
+      });
+    } catch (error) {
+      console.error('Error fetching buyer details:', error);
+    }
+  };
+
+
+  const downloadPDF = () => {
+    const doc = new jsPDF();
+
+    // Buyer Information
+    doc.text('Buyer Details', 14, 16);
+    doc.autoTable({
+      startY: 20,
+      body: [
+        ['Buyer Name', buyerDetails.buyer.Name],
+        ['Email', buyerDetails.buyer.email],
+        ['Phone', buyerDetails.buyer.phone],
+        ['Address', buyerDetails.buyer.address],
+        ['Pincode', buyerDetails.buyer.pincode],
+      ]
+    });
+
+    // Product Information
+    doc.text('Product Details', 14, doc.autoTable.previous.finalY + 10);
+    doc.autoTable({
+      startY: doc.autoTable.previous.finalY + 15,
+      body: [
+        ['Product Name', buyerDetails.product.product_name],
+        ['Bought At', `$${buyerDetails.item}`],
+        ['Product Quantity', '1'],
+        ['Total Amount', `$${buyerDetails.item}`],
+      ]
+    });
+
+    
+    doc.save(`buyer-details-${buyerDetails.name}.pdf`);
+  };
+
+
+  const renderSellItemsTab = () => {
+    switch (activeTab) {
+      case 'Add Product':
+        return <ProductForm />; 
+      case 'Listed Products':
+        return (
+          <div>
+        
+            {listedProducts.length > 0 ? (
+              listedProducts.map((product) => (
+                <div key={product._id} className="product-card">
+                  <img src={product.product_image} alt={product.product_name} />
+                  <div>
+                    <p><strong>{product.product_name}</strong></p>
+                    <p>Price: ${product.price}</p>
+                    <p>Status: {product.availability ? 'Available' : 'Sold'}</p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p>No products listed yet.</p>
+            )}
+          </div>
+        );
+      case 'Sold Items':
+        return (
+          <div className='sold-items'>
+            {soldItems.length > 0 ? (
+              soldItems.map((item) => (
+                <div key={item._id} className="product-card">
+                  <img src={item.productID.product_image} alt={item.productID.product_name} />
+                  <div>
+                    <p><strong>{item.productID.product_name}</strong></p>
+                    <p>Sold for: ${item.amount}</p>
+                    <p>Date Sold: {new Date(item.transactionDate).toLocaleDateString()}</p>
+                    <button onClick={() => fetchBuyerDetails(item.buyerID, item.productID,item.amount)}>Buyer Details</button>
+                  </div>
+
+                </div>
+              ))
+            ) : (
+              <p>No items sold yet.</p>
+            )}
+
+            {/*it Display Buyer Details Card */}
+            {buyerDetails && buyerDetails.buyer && buyerDetails.product && buyerDetails.item &&(
+              <div className="buyer-details-card">
+                <button id="close-btn" onClick={() => setBuyerDetails(null)}>X</button>
+                <p><strong>Buyer Name:</strong> {buyerDetails.buyer.Name}</p>
+                <p><strong>Email:</strong> {buyerDetails.buyer.email}</p>
+                <p><strong>Phone:</strong> {buyerDetails.buyer.phone}</p>
+                <p><strong>Address:</strong> {buyerDetails.buyer.address}</p>
+                <p><strong>Pincode:</strong> {buyerDetails.buyer.pincode}</p>
+
+                <p><strong>Product Name:</strong> {buyerDetails.product.product_name}</p>
+                <p><strong>Bought At:</strong> ${buyerDetails.item}</p>
+                <p><strong>Quantity: </strong>1</p>
+                <p><strong>Total Amount:</strong> ${buyerDetails.item}</p>
+
+                <button onClick={downloadPDF}>Download as PDF</button>
+              </div>
+            )}
+
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+  
+
+  useEffect(() => {
+    if (activeMenu === 'Sell items' && activeTab === 'Listed Products') {
+      fetchListedProducts();
+    } else if (activeMenu === 'Sell items' && activeTab === 'Sold Items') {
+      fetchSoldItems();
+    }
+  }, [activeMenu, activeTab, fetchListedProducts, fetchSoldItems]);
+
+
+
   const renderContent = () => {
     switch (activeMenu) {
       case 'Account':
@@ -529,14 +798,28 @@ const handlePayment = async () => {
         );
       case 'Sell items':
         return (
-          <div className="card">
-            <div className="card-title">Sell Items</div>
-            <div className="card-content"><ProductForm/></div>
+          <div className="sell-items-section">
+            <div className="tabs">
+              <div className={`tab ${activeTab === 'Add Product' ? 'active' : ''}`} onClick={() => setActiveTab('Add Product')}>
+                Add Product
+              </div>
+              <div className={`tab ${activeTab === 'Listed Products' ? 'active' : ''}`} onClick={() => setActiveTab('Listed Products')}>
+                Listed Products
+              </div>
+              <div className={`tab ${activeTab === 'Sold Items' ? 'active' : ''}`} onClick={() => setActiveTab('Sold Items')}>
+                Sold Items
+              </div>
+            </div>
+            <div className="card">
+              {renderSellItemsTab()}
+            </div>
           </div>
+
+
         );
-     
+      
       default:
-        return null;
+      return null;
     }
   };
 
