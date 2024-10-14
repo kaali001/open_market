@@ -177,6 +177,8 @@ io.on("connection", (socket) => {
   });
 });
 
+app.get("/", (req, res) => { res.send("Server is running successfully......"); });
+
 server.listen(port, function () {
   console.log(`Listening to port at : ${port}`);
 });
