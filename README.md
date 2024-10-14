@@ -1,6 +1,7 @@
 <h1 align="center">🛍️ open_market</h1>
 
-![landingPage](image.png)
+  ![image](https://github.com/user-attachments/assets/bf0163ac-0f3b-4d4e-bf2d-c2a94e7c787b)
+
 ## About the Project
 **open_martket** is an online bidding platform where users can bid on products in real-time. It provides an engaging auction experience with a beautiful and modern user interface, responsive across all devices. The platform supports user authentication, OTP verification, and secure payment handling through Razorpay.
 
