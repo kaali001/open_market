@@ -9,6 +9,7 @@ const cookieParser = require('cookie-parser');
 const adminRoutes = require("./routes/admin");
 const userRoutes = require("./routes/users");
 const productsRoutes = require("./routes/products");
+// const deliveryRoutes = require("./routes/delivery");
 const Product = require("./models/product");
 const Transaction = require("./models/transaction");
 const {User} = require("./models/user");
@@ -30,7 +31,7 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:3000", // Adjust this to match your frontend's URL
+    origin: process.env.FRONTEND_URL, // Adjust this to match your frontend's URL
     methods: ["GET", "POST","HEAD","PUT","PATCH","DELETE"]
   }
 });
@@ -39,7 +40,7 @@ const port = process.env.PORT || 5000;
 
 app.use(express.json());
 app.use(cors({
-  origin: "http://localhost:3000",
+  origin: process.env.FRONTEND_URL,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD"],
   credentials: true, 
 }));
@@ -52,7 +53,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use("/api/admin", adminRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/products", productsRoutes);
-
+// app.use("/api/delivery", deliveryRoutes);
 // Bidding Logic
 const activeBids = {};
 
