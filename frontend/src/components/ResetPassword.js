@@ -2,6 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
+import config from '../config';
 
 const ResetPassword = () => {
     const [data, setData] = useState({ password: "", confirmPassword: "" });
@@ -20,7 +21,7 @@ const ResetPassword = () => {
             return;
         }
         try {
-            const url = `http://localhost:5000/api/users/reset-password/${token}`;
+            const url = `${config.backendUrl}/api/users/reset-password/${token}`;
             const { data: res } = await axios.post(url, { password: data.password });
             setMessage(res);
 		

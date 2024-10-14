@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import styled from "styled-components"; 
 import axios from 'axios';
 import {useNavigate } from "react-router-dom";
+import config from './config';
 
 function ProductForm() {
   const [productData, setProductData] = useState({
@@ -50,7 +51,7 @@ function ProductForm() {
     formData.append('id', user_id);
 
    try {
-      const response = await axios.post('http://localhost:5000/api/products/add', formData, {
+      const response = await axios.post(`${config.backendUrl}/api/products/add`, formData, {
         headers: {
           'x-auth-token': token,
           'Content-Type': 'multipart/form-data', // tell server we are sending a file

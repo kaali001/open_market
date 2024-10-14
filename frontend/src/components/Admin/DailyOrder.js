@@ -4,6 +4,8 @@ import 'react-datepicker/dist/react-datepicker.css';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
 import styled from 'styled-components';
+import config from '../../config';
+
 
 const DailyOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -13,7 +15,7 @@ const DailyOrders = () => {
     const fetchOrders = async () => {
       const formattedDate = selectedDate.toISOString().split('T')[0];
       try {
-        const response = await axios.get(`http://localhost:5000/api/admin/orders?date=${formattedDate}`, { withCredentials: true });
+        const response = await axios.get(`${config.backendUrl}/api/admin/orders?date=${formattedDate}`, { withCredentials: true });
         setOrders(response.data.orders);
       } catch (error) {
         console.error('Error fetching orders:', error);

@@ -4,6 +4,7 @@ import axios from 'axios';
 import styled from 'styled-components';
 import { BiSearch } from "react-icons/bi";
 import UserDetailsModal from './UserDetails';
+import config from '../../config';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -17,7 +18,7 @@ const UserManagement = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/admin/users?page=${page}&search=${search}`,
+        const response = await axios.get(`${config.backendUrl}/api/admin/users?page=${page}&search=${search}`,
           { withCredentials: true });
         setUsers(response.data.users);
         setTotalPages(Math.ceil(response.data.total / 10));
@@ -33,7 +34,7 @@ const UserManagement = () => {
 
   const handleDeleteUsers = async () => {
     try {
-      await axios.delete('http://localhost:5000/api/admin/users', { data: { ids: selectedUsers } }, { withCredentials: true });
+      await axios.delete(`${config.backendUrl}/api/admin/users`, { data: { ids: selectedUsers } }, { withCredentials: true });
       setUsers(users.filter((user) => !selectedUsers.includes(user._id)));
       setSelectedUsers([]);
     } catch (error) {

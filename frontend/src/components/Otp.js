@@ -3,6 +3,7 @@ import React, { useState, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import config from '../config';
 
 const OtpComponent = () => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']); 
@@ -40,7 +41,7 @@ const OtpComponent = () => {
     e.preventDefault();
     try {
       const enteredOtp = otp.join(""); 
-      const response = await axios.post("http://localhost:5000/api/users/verifyOtp", { otp: enteredOtp, token });
+      const response = await axios.post(`${config.backendUrl}/api/users/verifyOtp`, { otp: enteredOtp, token });
     
       if (response.data.message === "OTP verified") {
         sessionStorage.removeItem('signupToken'); 
@@ -64,7 +65,7 @@ const OtpComponent = () => {
   // Handle OTP resend
   const handleResend = async () => {
     try {
-      await axios.post("http://localhost:5000/api/users/resendOtp", { token });
+      await axios.post(`${config.backendUrl}/api/users/resendOtp`, { token });
       setOtp(['', '', '', '', '', '']);
       setError(""); 
       setResendActive(false); 

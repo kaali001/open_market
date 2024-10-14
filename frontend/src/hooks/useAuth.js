@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import config from '../config';
 
 const useAuth = () => {
   const [authenticated, setAuthenticated] = useState(false);
@@ -9,7 +10,7 @@ const useAuth = () => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/admin/check-auth', { withCredentials: true });
+        const response = await axios.get(`${config.backendUrl}/api/admin/check-auth`, { withCredentials: true });
 
         setAuthenticated(response.data.authenticated);
         setIsAdmin(response.data.isAdmin);

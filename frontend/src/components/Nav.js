@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { Button } from '../styles/Button';
 import useAuth from '../hooks/useAuth';
+import config from '../config';
 
 const Nav = styled.nav`
   .navbar-lists {
@@ -212,7 +213,7 @@ const Navbar = () => {
 
   const adminLogoutUser = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/admin/logout', {
+      const response = await fetch(`${config.backendUrl}/api/admin/logout`, {
         method: 'POST',
         credentials: 'include', 
       });

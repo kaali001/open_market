@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import io from "socket.io-client";
 import axios from "axios";
+import config from './config';
 
 const SingleProduct = () => {
   const { id } = useParams(); // Get the product ID from the URL parameters
@@ -26,7 +27,7 @@ const SingleProduct = () => {
     if(user_id){
     const fetchUserBalance = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/users/balance/${user_id}`, {
+        const response = await axios.get(`${config.backendUrl}/api/users/balance/${user_id}`, {
           headers: {
             'x-auth-token': token,
           },
@@ -47,7 +48,7 @@ const SingleProduct = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/products/${id}`); 
+        const response = await axios.get(`${config.backendUrl}/api/products/${id}`); 
         setProduct(response.data); 
         setIsBiddingAllowed(response.data.availability);
       } catch (error) {
@@ -59,7 +60,7 @@ const SingleProduct = () => {
   }, [id]);
 
   useEffect(() => {
-    socket.current = io("http://localhost:5000");
+    socket.current = io(`${config.backendUrl}`);
 
     return () => {
       socket.current.disconnect(); // Disconnect socket when component unmounts

@@ -3,6 +3,7 @@ import { useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
+import config from './config';
 
 
 
@@ -17,7 +18,7 @@ const Login = () => {
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		try {
-			const url = "http://localhost:5000/api/users/login";
+			const url = `${config.backendUrl}/api/users/login`;
 			const { data: res } = await axios.post(url, data,{ withCredentials: true });
 
 			if (!res.isAdmin) {

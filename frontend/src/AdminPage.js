@@ -7,6 +7,8 @@ import UserManagement from './components/Admin/UserManagement';
 import TransactionManagement from './components/Admin/TransactionManagement';
 import { FaTachometerAlt, FaUsers, FaMoneyCheckAlt, FaBox, FaCog, FaSignOutAlt } from 'react-icons/fa'; // Importing icons
 import DailyOrders from './components/Admin/DailyOrder';
+import config from './config';
+
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -15,7 +17,7 @@ const Admin = () => {
   
   const logoutUser = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/admin/logout', {
+      const response = await fetch(`${config.backendUrl}/api/admin/logout`, {
         method: 'POST',
         credentials: 'include', 
       });

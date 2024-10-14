@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
 import { BiSearch } from "react-icons/bi";
+import config from '../../config';
 
 
 const TransactionManagement = () => {
@@ -13,7 +14,7 @@ const TransactionManagement = () => {
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/admin/transactions', { withCredentials: true });
+        const response = await axios.get(`${config.backendUrl}/api/admin/transactions`, { withCredentials: true });
         setTransactions(response.data);
       } catch (error) {
         console.error('Error fetching transactions:', error);

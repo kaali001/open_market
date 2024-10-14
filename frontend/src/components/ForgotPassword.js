@@ -2,6 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
+import config from '../config';
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState("");
@@ -11,7 +12,7 @@ const ForgotPassword = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const url = "http://localhost:5000/api/users/forgot-password";
+            const url = `${config.backendUrl}/api/users/forgot-password`;
             const { data: res } = await axios.post(url, { email });
             setMessage(res);
 			

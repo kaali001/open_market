@@ -6,7 +6,8 @@ import { FaPen } from 'react-icons/fa';
 import ProductForm from './ProductForm';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-
+import DeliveryCard from './components/UserPage/DeliveryCard';
+import config from './config';
 
 // Load Razorpay script dynamically
 const loadScript = (src) => {
@@ -331,6 +332,7 @@ const ProfilePageWrapper = styled.div`
 
   button {
     margin-top: 10px;
+    margin-right:15px;
     padding: 6px 10px;
     background-color: #007bff;
     color: white;
@@ -346,7 +348,7 @@ const ProfilePageWrapper = styled.div`
   #close-btn {
     position: absolute;
     top: -8px;
-    right: 2px;
+    right: -16px;
     background: red;
     color: white;
     border: none;
@@ -384,6 +386,9 @@ const UserProfilePage = () => {
   const [listedProducts, setListedProducts] = useState([]);
   const [soldItems, setSoldItems] = useState([]); 
   const [buyerDetails, setBuyerDetails] = useState(null);
+  const [showDeliveryCard, setShowDeliveryCard] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedBuyerDetails, setSelectedBuyerDetails] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const navigate = useNavigate();
   const logoutUser = () => {
@@ -394,9 +399,8 @@ const UserProfilePage = () => {
 
 
   const fetchContent = useCallback(async () => {
-  
     if (activeMenu === 'Account') {
-      const response = await axios.get(`http://localhost:5000/api/users/account/${userId}`,
+      const response = await axios.get(`${config.backendUrl}/api/users/account/${userId}`,
         {
          headers: {
            'x-auth-token': token,
@@ -405,7 +409,7 @@ const UserProfilePage = () => {
       );
       setUserDetails(response.data);
     } else if (activeMenu === 'Bought items') {
-      const response = await axios.get(`http://localhost:5000/api/users/bought-items/${userId}`,
+      const response = await axios.get(`${config.backendUrl}/api/users/bought-items/${userId}`,
         {
           headers: {
              'x-auth-token': token,
@@ -414,7 +418,7 @@ const UserProfilePage = () => {
       );
       setBoughtItems(response.data);
     } else if (activeMenu === 'Balance') {
-      const response = await axios.get(`http://localhost:5000/api/users/balance/${userId}`,
+      const response = await axios.get(`${config.backendUrl}/api/users/balance/${userId}`,
         {
          headers: {
             'x-auth-token': token,
@@ -445,7 +449,7 @@ const UserProfilePage = () => {
 
   const handleSaveDetails = async () => {
   
-    await axios.patch(`http://localhost:5000/api/users/account/${userId}`, userDetails,
+    await axios.patch(`${config.backendUrl}/api/users/account/${userId}`, userDetails,
       {
         headers: {
           'x-auth-token': token,
@@ -464,7 +468,7 @@ const handlePayment = async () => {
       return;
     }
 
-    const result = await fetch('http://localhost:5000/api/users/payment/create-order', {
+    const result = await fetch(`${config.backendUrl}/api/users/payment/create-order`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -488,7 +492,7 @@ const handlePayment = async () => {
       description: 'Add Balance to Account',
       order_id: order.id,
       handler: async function (response) {
-        const verifyUrl = 'http://localhost:5000/api/users/payment/verify-payment';
+        const verifyUrl = `${config.backendUrl}/api/users/payment/verify-payment`;
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = response;
 
         const data = {
@@ -534,7 +538,7 @@ const handlePayment = async () => {
 
   // Fetching listed products
   const fetchListedProducts = useCallback(async () => {
-    const response = await axios.get(`http://localhost:5000/api/users/listed-items/${userId}/products`, {
+    const response = await axios.get(`${config.backendUrl}/api/users/listed-items/${userId}/products`, {
       headers: { 'x-auth-token': token }
     });
     setListedProducts(response.data);
@@ -543,7 +547,7 @@ const handlePayment = async () => {
 
   // Fetching sold items
   const fetchSoldItems = useCallback(async () => {
-    const response = await axios.get(`http://localhost:5000/api/users/sold-items/${userId}/products`, {
+    const response = await axios.get(`${config.backendUrl}/api/users/sold-items/${userId}/products`, {
       headers: { 'x-auth-token': token }
     });
     setSoldItems(response.data);
@@ -553,7 +557,7 @@ const handlePayment = async () => {
   //fetching buyer details of a listed product
   const fetchBuyerDetails = async (buyerID, productID, amount) => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/users/buyer-details/${buyerID}`,{
+      const response = await axios.get(`${config.backendUrl}/api/users/buyer-details/${buyerID}`,{
         headers:{'x-auth-token': token}
       });
       setBuyerDetails({
@@ -600,6 +604,34 @@ const handlePayment = async () => {
   };
 
 
+  const handleOpenDeliveryCard = async (product, buyer,amount) => {
+   
+    try {
+      const response = await axios.get(`${config.backendUrl}/api/users/buyer-details/${buyer}`,{
+        headers:{'x-auth-token': token}
+      });
+
+      setSelectedBuyerDetails({
+        buyerdata: response.data,
+        Amount: amount,
+
+      });
+     
+    } catch (error) {
+      console.error('Error fetching buyer details:', error);
+    }
+  
+    setSelectedProduct(product);
+    
+    setShowDeliveryCard(true);
+  };
+  
+  const handleCloseDeliveryCard = () => {
+    setShowDeliveryCard(false);
+  };
+
+
+
   const renderSellItemsTab = () => {
     switch (activeTab) {
       case 'Add Product':
@@ -636,6 +668,7 @@ const handlePayment = async () => {
                     <p>Sold for: ${item.amount}</p>
                     <p>Date Sold: {new Date(item.transactionDate).toLocaleDateString()}</p>
                     <button onClick={() => fetchBuyerDetails(item.buyerID, item.productID,item.amount)}>Buyer Details</button>
+                    <button onClick={() => handleOpenDeliveryCard(item.productID, item.buyerID, item.amount)}>Deliver</button>
                   </div>
 
                 </div>
@@ -661,6 +694,15 @@ const handlePayment = async () => {
 
                 <button onClick={downloadPDF}>Download as PDF</button>
               </div>
+            )}
+
+            
+            {showDeliveryCard && (
+              <DeliveryCard
+                product={selectedProduct}
+                buyerDetails={selectedBuyerDetails}
+                closeModal={handleCloseDeliveryCard}
+              />
             )}
 
           </div>

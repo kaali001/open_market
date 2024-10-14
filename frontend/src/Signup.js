@@ -3,7 +3,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-
+import config from './config';
 import styled from "styled-components";
 
 const Signup = () => {
@@ -25,7 +25,7 @@ const Signup = () => {
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		try {
-			const url = "http://localhost:5000/api/users/signup";
+			const url = `${config.backendUrl}/api/users/signup`;
 			const response = await axios.post(url, data);
 
 			const { user_id } = response.data;

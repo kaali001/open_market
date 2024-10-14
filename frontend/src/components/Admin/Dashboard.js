@@ -5,6 +5,8 @@ import { Line } from 'react-chartjs-2';
 import styled from 'styled-components';
 
 import { Chart, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+import config from '../../config';
+
 
 // Register the required components
 Chart.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
@@ -19,7 +21,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/admin/statistics',{ withCredentials: true });
+        const response = await axios.get(`${config.backendUrl}/api/admin/statistics`,{ withCredentials: true });
         setStats(response.data);
         setLoading(false);
       } catch (error) {

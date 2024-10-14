@@ -5,6 +5,7 @@ import Filter from "./components/Filter";
 import Sort from "./components/Sort";
 import ProductList from "./components/ProductList";
 import SearchBar from "./components/SearchBar";
+import config from './config';
 
 const Voov = () => {
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -13,7 +14,7 @@ const Voov = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/products");
+        const response = await axios.get(`${config.backendUrl}/api/products`);
         setFilteredProducts(response.data);
       } catch (error) {
         console.error("Error fetching products:", error);

@@ -3,6 +3,7 @@ import axios from 'axios';
 import styled from 'styled-components';
 import ProductItem from './UserProduct';
 import TransactionItem from './UserTransaction';
+import config from '../../config';
 
 const UserDetailsModal = ({ user, onClose }) => {
   const [tab, setTab] = useState('details');
@@ -15,9 +16,9 @@ const UserDetailsModal = ({ user, onClose }) => {
     const fetchUserDetails = async () => {
       try {
         const [userResponse, transactionsResponse, productsResponse] = await Promise.all([
-          axios.get(`http://localhost:5000/api/users/account/${user._id}`, { withCredentials: true }),
-          axios.get(`http://localhost:5000/api/users/bought-items/${user._id}`, { withCredentials: true }),
-          axios.get(`http://localhost:5000/api/users/listed-items/${user._id}/products`, { withCredentials: true })
+          axios.get(`${config.backendUrl}/api/users/account/${user._id}`, { withCredentials: true }),
+          axios.get(`${config.backendUrl}/api/users/bought-items/${user._id}`, { withCredentials: true }),
+          axios.get(`${config.backendUrl}/api/users/listed-items/${user._id}/products`, { withCredentials: true })
         ]);
 
         setUserDetails(userResponse.data);
