@@ -2,7 +2,7 @@
 const config = {
     backendUrl:
       process.env.NODE_ENV === 'production'
-        ? 'https://open-market-server.vercel.app'
+        ? 'https://open-market-server.onrender.com'
         : 'http://localhost:5000',
   };
   
