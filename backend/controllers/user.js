@@ -35,7 +35,7 @@ exports.login = async (req, res) => {
     if (user.isAdmin) {
       res.cookie('token', token, {
         httpOnly: true,
-        // secure: process.env.NODE_ENV === 'production', // use secure cookies in production
+        secure: process.env.NODE_ENV === 'production', // use secure cookies in production
         sameSite: 'Strict',
         maxAge: 60 * 60 * 1000, // 1 hour
       });
