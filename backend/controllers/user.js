@@ -31,16 +31,17 @@ exports.login = async (req, res) => {
       const token = user.generateAuthToken();
 
 
-    // If the user is an admin, set the token as an httpOnly cookie
-    if (user.isAdmin) {
-      res.cookie('token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production', // use secure cookies in production
-        sameSite: 'Strict',
-        maxAge: 60 * 60 * 1000, // 1 hour
-      });
+      const isProduction = process.env.NODE_ENV === 'production';
 
-    }
+      if (user.isAdmin) {
+        res.cookie('token', token, {
+          httpOnly: true,
+          secure: isProduction, // Only use secure cookies in production
+          sameSite: isProduction ? 'None' : 'Strict', // Cross-site for production, strict otherwise
+          maxAge: 60 * 60 * 1000, // 1 hour
+        });
+      }
+      
 
     res.status(200).send({ token, user_id: user._id, isAdmin: user.isAdmin, message: "logged in successfully" });
   } catch (error) {

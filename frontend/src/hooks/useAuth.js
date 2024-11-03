@@ -9,9 +9,15 @@ const useAuth = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
+      const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+      
+      if (!isLoggedIn) {
+        setLoading(false); 
+        return;
+      }
+
       try {
         const response = await axios.get(`${config.backendUrl}/api/admin/check-auth`, { withCredentials: true });
-
         setAuthenticated(response.data.authenticated);
         setIsAdmin(response.data.isAdmin);
       } catch (error) {
