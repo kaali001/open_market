@@ -12,12 +12,15 @@ const ResetPassword = () => {
 
     const handleChange = ({ currentTarget: input }) => {
         setData({ ...data, [input.name]: input.value });
+		setError("");
+		setMessage("");
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (data.password !== data.confirmPassword) {
             setError("Passwords do not match");
+			setMessage("");
             return;
         }
         try {
@@ -28,7 +31,8 @@ const ResetPassword = () => {
             setError("");
         } catch (error) {
             if (error.response && error.response.status >= 400 && error.response.status <= 500) {
-                setError(error.response.data.message);
+                setError(error.response.data);
+				setMessage("");
             }
         }
     };

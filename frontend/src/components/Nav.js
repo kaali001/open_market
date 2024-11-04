@@ -8,10 +8,12 @@ import config from '../config';
 const Nav = styled.nav`
   .navbar-lists {
     display: flex;
-    padding: 0 0.8rem 0 4rem;
-    gap: 3rem;
     align-items: center;
     justify-content: flex-end;
+    gap: 2rem;
+    padding: 0 2rem;
+    overflow: hidden;
+
     .navbar-link {
       &:link,
       &:visited {
@@ -19,7 +21,6 @@ const Nav = styled.nav`
         text-decoration: none;
         font-size: 1.8rem;
         font-weight: 500;
-        text-transform: uppercase;
         color: ${({ theme }) => theme.colors.white};
         transition: color 0.3s linear;
       }
@@ -35,7 +36,6 @@ const Nav = styled.nav`
     display: flex;
     align-items: center;
     cursor: pointer;
-     left: -5%;
 
     img {
       border-radius: 50%;
@@ -47,7 +47,7 @@ const Nav = styled.nav`
     .profile-popup { 
       position: absolute;
       top: 100%;
-      right: -25px;
+      right: 0;
       background-color: #fff;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
       border-radius: 8px;
@@ -63,7 +63,7 @@ const Nav = styled.nav`
     .popup-item {
       padding: 10px;
       text-align: center;
-      font-size:1.2rem;
+      font-size: 1.2rem;
       cursor: pointer;
       &:hover {
         background-color: ${({ theme }) => theme.colors.helper};
@@ -72,27 +72,29 @@ const Nav = styled.nav`
     }
   }
 
-  /* for toggle button */
+  /* Toggle button */
   .toggle-btn {
     display: none;
     background-color: transparent;
     cursor: pointer;
-    border: ${({ theme }) => theme.colors.black};
-  }
-  .toggle-icon[name='close-outline'] {
-    display: none;
-  }
-  .close-outline {
-    display: none;
-  }
+    border: none;
+    z-index: 1000; /* Ensure it is above other elements */
 
+    .toggle-icon {
+      color: ${({ theme }) => theme.colors.white};
+
+    }
+  }
+    
+
+  /* Cart icon styling */
   .cart-trolley--link {
     position: relative;
 
     .cart-trolley {
-      position: relative;
-      height: 4rem;
+      height: 3.5rem;
     }
+
     .cart-total--item {
       width: 1.4rem;
       height: 1.4rem;
@@ -103,24 +105,15 @@ const Nav = styled.nav`
       border-radius: 50%;
       display: grid;
       place-items: center;
-      top: -15%;
-      left: 45%;
+      top: -10%;
+      left: 60%;
     }
-  }
-  .user-login--name {
-    text-transform: capitalize;
-  }
-  .user-logout,
-  .user-login {
-    font-size: 1.4rem;
-    padding: 0.8rem 1.4rem;
   }
 
   @media (max-width: ${({ theme }) => theme.media.mobile}) {
     .toggle-btn {
       display: inline-block;
       z-index: 9999;
-      border: ${({ theme }) => theme.colors.black};
 
       .toggle-icon {
         font-size: 3.2rem;
@@ -141,67 +134,39 @@ const Nav = styled.nav`
     }
 
     .navbar-lists {
-      width: 100vw;
-      height: 100vh;
-      position: absolute;
+      position: fixed;
       top: 0;
       left: 0;
-      background-color: #fff;
-
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(255, 255, 255, 0.95); /* Slightly transparent */
+      font-size: 2.5rem;
+      color: black;
       display: flex;
-      justify-content: center;
-      align-items: center;
       flex-direction: column;
-
+      align-items: center;
+      justify-content: center;
+      gap: 3rem;
       visibility: hidden;
       opacity: 0;
       transform: translateX(100%);
-      transition: all 3s linear;
+      transition: transform 0.3s ease, visibility 0.3s ease;
     }
+
     .active .navbar-lists {
       visibility: visible;
       opacity: 1;
       transform: translateX(0);
       z-index: 999;
-      transform-origin: right;
-      transition: all 3s linear;
-
       .navbar-link {
-        font-size: 4.2rem;
+        font-size: 3.2rem;
         color: black;
       }
     }
-    .cart-trolley--link {
-      position: relative;
-
-      .cart-trolley {
-        position: relative;
-        height: 4.2rem;
-      }
-
-      .cart-total--item {
-        width: 3.2rem;
-        height: 3.2rem;
-        font-size: 2rem;
-      }
-    }
-
-      .profile-pic-container { /* New styles for profile picture container */
-        position: relative;
-        left: 0%;
-        cursor: pointer;
-      }
-
-    .user-logout,
-    .user-login {
-      font-size: 2rem;
-      padding: 0.8rem 1.4rem;
-    }
   }
 `;
-
 const Navbar = () => {
-  const { authenticated, isAdmin } = useAuth(); //checking if user is admin
+  const { authenticated, isAdmin } = useAuth();
   const [menuIcon, setMenuIcon] = useState(false); 
   const navigate = useNavigate(); 
   const isLoggedin = window.localStorage.getItem("isLoggedIn");
@@ -219,7 +184,6 @@ const Navbar = () => {
       });
 
       if (response.ok) {
-      
         window.localStorage.clear();
         navigate("/"); 
       } else {
@@ -229,8 +193,6 @@ const Navbar = () => {
       console.error('Error logging out:', error);
     }
   };
-
-
 
   return (
     <Nav>
@@ -255,7 +217,7 @@ const Navbar = () => {
             </NavLink>
           </li>
 
-          {isLoggedin === "true" ? ( // Profile pic and popup menu if logged in
+          {isLoggedin === "true" ? (
             <li className='profile-pic-container'>
               <img src='/images/avatar.svg' alt='Profile' />
               <div className='profile-popup'>
@@ -263,7 +225,6 @@ const Navbar = () => {
                     authenticated && isAdmin ? (navigate('/admin')) : (
                     navigate('/user-profile'))}
                   }>Account</div>
-                {/* <div className='popup-item' onClick={() => navigate('/user-profile#be-seller')}>Be Seller</div> */}
                 <div className='popup-item' onClick={() => {
                   if (authenticated && isAdmin) {
                     adminLogoutUser();
@@ -282,8 +243,21 @@ const Navbar = () => {
           )}
         </ul>
         <div className='toggle-btn'>
-          <img className='toggle-icon' src='/images/toggle.png' alt='Menu' onClick={() => setMenuIcon(true)} />
-          <img className='toggle-icon close-outline' src='/images/cross.png' onClick={() => setMenuIcon(false)} alt='Close' />
+          {menuIcon ? (
+            <img
+              className="toggle-icon close-outline"
+              src="/images/cross.png"
+              onClick={() => setMenuIcon(false)}
+              alt="Close"
+            />
+          ) : (
+            <img
+              className="toggle-icon"
+              src="/images/toggle.png"
+              onClick={() => setMenuIcon(true)}
+              alt="Menu"
+            />
+          )}
         </div>
       </div>
     </Nav>

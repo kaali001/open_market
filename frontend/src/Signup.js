@@ -82,7 +82,7 @@ const Signup = () => {
 							className={"input"}
 						/>
                         <input
-							type="Numeric"
+							type="number"
 							placeholder="Phone"
 							name="phone"
 							onChange={handleChange}
@@ -101,7 +101,7 @@ const Signup = () => {
 							className={"input"}
 						/>
 						  <input
-							type="Numeric"
+							type="number"
 							placeholder="Pincode"
 							name="pincode"
 							onChange={handleChange}
