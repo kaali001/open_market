@@ -9,6 +9,12 @@ const ForgotPassword = () => {
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
 
+	const handleChange = ({ currentTarget: input }) => {
+		setEmail( input.value );
+		setError("");
+		setMessage("");
+	};
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -19,7 +25,7 @@ const ForgotPassword = () => {
             setError("");
         } catch (error) {
             if (error.response && error.response.status >= 400 && error.response.status <= 500) {
-                setError(error.response.data.message);
+                setError(error.response.data);
                 setMessage("");
             }
         }
@@ -39,7 +45,7 @@ const ForgotPassword = () => {
                                 type="email"
                                 placeholder="Enter your email"
                                 name="email"
-                                onChange={(e) => setEmail(e.target.value)}
+                                onChange={handleChange}
                                 value={email}
                                 required
                                 className="input"
@@ -121,17 +127,29 @@ const Wrapper = styled.section`
 	font-size: 14px;
 }
 
-.error_msg,.success_msg {
+.error_msg{
 	width: 370px;
 	padding: 10px;
 	margin: 10px 0;
 	font-size: 14px;
-	background-color:#f7eea6;
-	color: #c28627;
+	background-color:#f7eea67d;
+	border: 1px solid #af6d05;
+	color: #af6d05;
 	border-radius: 5px;
 	text-align: center;
 }
 
+.success_msg {
+	width: 370px;
+	padding: 10px;
+	margin: 10px 0;
+	font-size: 14px;
+	background-color:#dafbe1;
+	color: green;
+	border-radius: 5px;
+	border: 1px solid green;
+	text-align: center;
+}
 .right {
 	flex: 1;
 	display: flex;

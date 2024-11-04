@@ -13,6 +13,7 @@ const Login = () => {
      
 	const handleChange = ({ currentTarget: input }) => {
 		setData({ ...data, [input.name]: input.value });
+		setError("");
 	};
 
 	const handleSubmit = async (e) => {
@@ -34,7 +35,7 @@ const Login = () => {
 				error.response.status >= 400 &&
 				error.response.status <= 500
 			) {
-				setError(error.response.data.message);
+				setError(error.response.data);
 			}
 		}
 	};
