@@ -12,7 +12,6 @@ const Nav = styled.nav`
     justify-content: flex-end;
     gap: 2rem;
     padding: 0 2rem;
-    overflow: hidden;
 
     .navbar-link {
       &:link,
@@ -31,7 +30,7 @@ const Nav = styled.nav`
     }
   }
 
-  .profile-pic-container { 
+  .profile-pic-container {
     position: relative;
     display: flex;
     align-items: center;
@@ -41,19 +40,25 @@ const Nav = styled.nav`
       border-radius: 50%;
       height: 4rem;
       width: 4rem;
-      border: 2px solid green;  
+      border: 2px solid green;
     }
 
-    .profile-popup { 
+    .profile-popup {
       position: absolute;
-      top: 100%;
-      right: 0;
+      top: calc(70% + 10px); /* Add spacing below profile image */
+      right: -20px;
       background-color: #fff;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       border-radius: 8px;
       display: none;
       flex-direction: column;
-      width: 10rem;
+      width: 10rem; /* Adjust width */
+      z-index: 1000; /* Ensure it's above all elements */
+      overflow: hidden;
+
+      /* Handle screen edge visibility */
+      max-height: 80vh;
+      overflow-y: auto;
     }
 
     &:hover .profile-popup {
@@ -82,12 +87,9 @@ const Nav = styled.nav`
 
     .toggle-icon {
       color: ${({ theme }) => theme.colors.white};
-
     }
   }
-    
 
-  /* Cart icon styling */
   .cart-trolley--link {
     position: relative;
 
@@ -98,7 +100,7 @@ const Nav = styled.nav`
     .cart-total--item {
       width: 1.4rem;
       height: 1.4rem;
-      font-size:1rem;
+      font-size: 1rem;
       position: absolute;
       background-color: ${({ theme }) => theme.colors.helper};
       color: #fff;
@@ -139,7 +141,7 @@ const Nav = styled.nav`
       left: 0;
       width: 100vw;
       height: 100vh;
-      background-color: rgba(255, 255, 255, 0.95); /* Slightly transparent */
+      background-color: rgba(255, 255, 255, 0.95);
       font-size: 2.5rem;
       color: black;
       display: flex;
@@ -165,6 +167,7 @@ const Nav = styled.nav`
     }
   }
 `;
+
 const Navbar = () => {
   const { authenticated, isAdmin } = useAuth();
   const [menuIcon, setMenuIcon] = useState(false); 
